@@ -1,10 +1,7 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
-
 AC_PREREQ([2.63])
 AC_INIT(usbsoftrock.c)
 AM_INIT_AUTOMAKE(usbsoftrock,1.0.2)
-AC_CONFIG_SRCDIR([usbsoftrock.c])
+AC_CONFIG_SRCDIR([src/usbsoftrock.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
@@ -35,5 +32,5 @@ AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
