@@ -1,0 +1,13 @@
+Source: usbsoftrock 
+Section: hamradio 
+Essential: no
+Priority: extra 
+Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Build-Depends: libfftw3-dev, debhelper (>= 7.0.50), libc6 (>= 2.3.4), libstdc++6 (>= 4.4.0)
+
+Package: usbsoftrock 
+Depends: 
+Recommends: sdr-shell, dttsp_sdr-core
+Architecture: any
+Description: Usbsoftrock allows use of the Si570 based Softrock kits (and others) from Linux.
+Homepage: http://code.google.com/p/usbsoftrock/
