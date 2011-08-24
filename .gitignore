@@ -1,3 +1,5 @@
+usbsoftrock-1.0.2/autom4te.cache/*
+usbsoftrock-1.0.2/debian/tmp/*
 configure
 *.o
 Makefile
