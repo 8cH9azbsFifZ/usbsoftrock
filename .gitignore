@@ -1,3 +1,6 @@
 configure
 *.o
 Makefile
+config.status
+config.log
+config.h
