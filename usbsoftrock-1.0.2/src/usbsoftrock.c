@@ -60,10 +60,6 @@
 #include "config_ops.h"
 #include "interactive.h"
 
-#ifdef HAVE_LIBCONFIG
-# include <libconfig.h>
-#endif
-
 #define USBDEV_SHARED_VENDOR    0x16C0  /* VOTI */
 #define USBDEV_SHARED_PRODUCT   0x05DC  /* Obdev's free shared PID */
 /* Use obdev's generic shared VID/PID pair and follow the rules outlined
@@ -254,20 +250,6 @@ int main(int argc, char **argv) {
   char **args = malloc(MAX_COMMAND_ARGS * sizeof(char *));
   int port = 19004;
   int daemon = 0;
-
-#ifdef HAVE_LIBCONFIG
-  // Read configuration file
-  config_t cfg;
-/*  config_init(&cfg);
-  if(! config_read_file(&cfg, "example.cfg"))
-  {
-    fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
-    config_error_line(&cfg), config_error_text(&cfg));
-    config_destroy(&cfg);
-    exit(EXIT_FAILURE);
-  }
-*/
-#endif
 
   // Read options
   while ( (c = getopt(argc, argv, "adhi:m:p:s:u:vx:")) != -1) {
