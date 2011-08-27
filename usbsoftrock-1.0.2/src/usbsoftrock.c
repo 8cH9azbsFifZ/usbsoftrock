@@ -258,6 +258,7 @@ int main(int argc, char **argv) {
 #ifdef HAVE_LIBCONFIG
   // Read configuration file
   config_t cfg;
+/*  config_init(&cfg);
   if(! config_read_file(&cfg, "example.cfg"))
   {
     fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
@@ -265,6 +266,7 @@ int main(int argc, char **argv) {
     config_destroy(&cfg);
     exit(EXIT_FAILURE);
   }
+*/
 #endif
 
   // Read options
@@ -379,7 +381,7 @@ int main(int argc, char **argv) {
       if (bytes > 0) {
         buffer[bytes] = 0;
         if (verbose >= 2)
-          printf("Returned %d bytes from %s: %s\n", bytes, inet_ntoa(clnt.sin_addr), buffer);
+          printf("Returned %d bytes from %s: %s\n", (int)bytes, inet_ntoa(clnt.sin_addr), buffer);
 
         if (strncmp(buffer, "quit", 4) == 0) {
           if (verbose)
@@ -418,7 +420,7 @@ int main(int argc, char **argv) {
         }
 
       } else {
-      	fprintf(stderr, "recvfrom returned %d\n", bytes);
+      	fprintf(stderr, "recvfrom returned %d\n", (int)bytes);
       }
     }
 
