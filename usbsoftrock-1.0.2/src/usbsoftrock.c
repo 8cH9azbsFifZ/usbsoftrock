@@ -76,8 +76,11 @@
 
 double multiplier = 4;
 
-#define VENDOR_NAME			"www.obdev.at"
-#define PRODUCT_NAME			"DG8SAQ-I2C"
+#ifndef HAVE_LIBCONFIG
+/* If no libconfig, only static vendor config */
+# define VENDOR_NAME				"www.obdev.at"
+# define PRODUCT_NAME			"DG8SAQ-I2C"
+#endif
 
 extern char    serialNumberString[256];
 
@@ -251,6 +254,18 @@ int main(int argc, char **argv) {
   char **args = malloc(MAX_COMMAND_ARGS * sizeof(char *));
   int port = 19004;
   int daemon = 0;
+
+#ifdef HAVE_LIBCONFIG
+  // Read configuration file
+  config_t cfg;
+  if(! config_read_file(&cfg, "example.cfg"))
+  {
+    fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+    config_error_line(&cfg), config_error_text(&cfg));
+    config_destroy(&cfg);
+    exit(EXIT_FAILURE);
+  }
+#endif
 
   // Read options
   while ( (c = getopt(argc, argv, "adhi:m:p:s:u:vx:")) != -1) {
