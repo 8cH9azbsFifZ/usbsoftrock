@@ -66,6 +66,7 @@
  * in firmware/usbdrv/USBID-License.txt.
  */
 
+
 // Number of attempts to complete an USB operation before giving up.
 #define USB_MAX_RETRIES		3
 
@@ -301,6 +302,15 @@ int main(int argc, char **argv) {
   char attempt=0, error=0;
   do {
 	attempt++;
+// lsusb -d 16c0:05dc
+// iManufacturer           1 www.ov-lennestadt.de
+// iProduct                2 FiFi-SDR
+// iSerial                 3 F50000064CE267E3535220E80B0B0F1F
+#define VENDOR_NAME "www.ov-lennestadt.de"
+#define PRODUCT_NAME "FiFi-SDR"
+//#define usbSerialID "F50000064CE267E3535220E80B0B0F1F"
+
+
 	error=usbOpenDevice(&handle, USBDEV_SHARED_VENDOR, VENDOR_NAME, USBDEV_SHARED_PRODUCT, PRODUCT_NAME, usbSerialID);
 	if(error != 0){
 	  fprintf(stderr, "Could not open USB device \"%s\" with vid=0x%x pid=0x%x, retrying\n", PRODUCT_NAME, USBDEV_SHARED_VENDOR, USBDEV_SHARED_PRODUCT);
