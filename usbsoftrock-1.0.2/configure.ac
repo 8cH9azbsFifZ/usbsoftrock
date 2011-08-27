@@ -9,9 +9,14 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_INSTALL
 
+# Some common path names to search
+CPPFLAGS="-I../ -I/usr/local/include -I/opt/local/include ${CPPFLAGS}"
+CFLAGS="-I../ -I/usr/local/include -I/opt/local/include ${CFLAGS}"
+LDFLAGS="-L/usr/lib -L/usr/local/lib -L/opt/local/lib ${LDFLAGS}"
+
 # Checks for libraries.
 AC_CHECK_LIB(ncurses, main,,echo "*** The ncurses library is required for interactive mode!")
-AC_CHECK_LIB(libconfig, config_read_file,,echo "*** The libconfig library is required for advanced configuration!")
+AC_CHECK_LIB(config, main,,echo "*** The libconfig library is required for advanced configuration!")
 PKG_CHECK_MODULES(libusb, libusb,
 	[
 	CFLAGS="$CFLAGS $libusb_CFLAGS"
