@@ -11,6 +11,7 @@ AC_PROG_INSTALL
 
 # Checks for libraries.
 AC_CHECK_LIB(ncurses, main,,echo "*** The ncurses library is required for interactive mode!")
+AC_CHECK_LIB(libconfig, config_read_file,,echo "*** The libconfig library is required for advanced configuration!")
 PKG_CHECK_MODULES(libusb, libusb,
 	[
 	CFLAGS="$CFLAGS $libusb_CFLAGS"

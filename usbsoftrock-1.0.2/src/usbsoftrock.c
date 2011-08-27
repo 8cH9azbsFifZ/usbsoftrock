@@ -60,6 +60,10 @@
 #include "config_ops.h"
 #include "interactive.h"
 
+#ifdef HAVE_LIBCONFIG
+# include <libconfig.h>
+#endif
+
 #define USBDEV_SHARED_VENDOR    0x16C0  /* VOTI */
 #define USBDEV_SHARED_PRODUCT   0x05DC  /* Obdev's free shared PID */
 /* Use obdev's generic shared VID/PID pair and follow the rules outlined
