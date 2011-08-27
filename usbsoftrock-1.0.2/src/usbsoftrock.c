@@ -72,12 +72,6 @@
 
 double multiplier = 4;
 
-#ifndef HAVE_LIBCONFIG
-/* If no libconfig, only static vendor config */
-# define VENDOR_NAME				"www.obdev.at"
-# define PRODUCT_NAME			"DG8SAQ-I2C"
-#endif
-
 extern char    serialNumberString[256];
 
 #define MAX_COMMAND_ARGS 3
@@ -118,6 +112,11 @@ static void usage(char *name)
   fprintf(stderr, "  -x <calibrated xtall freq MHz> Corrected XTALL frequency of Si570 device calculated\n");
   fprintf(stderr, "                                 through the use of the calibrate command immediately\n");
   fprintf(stderr, "                                 after startup.\n");
+  fprintf(stderr, "  -V <vendor_name>               device vendor name (see below)\n");
+  fprintf(stderr, "  -P <product_name>              device product name (see below)\n");
+  fprintf(stderr, "                                 Find your vendor \& product name: lsusb -d 16c0:05dc\n");
+  fprintf(stderr, "                                 SoftRock USB: -V \"www.obdev.ati\" -P \"DG8SAQ-I2C\"\n");
+  fprintf(stderr, "                                 FiFi SDR: -V \"www.ov-lennestadt.de\" -P \"FiFi-SDR\"\n");
   fprintf(stderr, "COMMAND is one of\n");
   fprintf(stderr, "  calibrate (may require -s option)\n");
   fprintf(stderr, "  getfreq\n");
@@ -241,6 +240,8 @@ else if ((strcmp(argv[0], "set") == 0) && (argc >= 2)) {
 int main(int argc, char **argv) {
   usb_dev_handle      *handle = NULL;
   char * usbSerialID = NULL;
+  char * vendor_name = NULL;
+  char * product_name = NULL;
   int c;
 
 // moved this malloc() here instead of within the while(1) loop
@@ -252,7 +253,7 @@ int main(int argc, char **argv) {
   int daemon = 0;
 
   // Read options
-  while ( (c = getopt(argc, argv, "adhi:m:p:s:u:vx:")) != -1) {
+  while ( (c = getopt(argc, argv, "adhi:m:p:s:u:vx:V:P:")) != -1) {
     switch (c) {
     case 'i':
       i2cAddress = atoi(optarg);
@@ -284,6 +285,12 @@ int main(int argc, char **argv) {
     case 'v':
       verbose++;
       break;
+	 case 'V':
+		vendor_name = optarg;
+		break;
+	 case 'P':
+		product_name = optarg;
+		break;
     default: /* '?' */
       usage(argv[0]);
       exit(EXIT_FAILURE);
@@ -305,18 +312,10 @@ int main(int argc, char **argv) {
   char attempt=0, error=0;
   do {
 	attempt++;
-// lsusb -d 16c0:05dc
-// iManufacturer           1 www.ov-lennestadt.de
-// iProduct                2 FiFi-SDR
-// iSerial                 3 F50000064CE267E3535220E80B0B0F1F
-#define VENDOR_NAME "www.ov-lennestadt.de"
-#define PRODUCT_NAME "FiFi-SDR"
-//#define usbSerialID "F50000064CE267E3535220E80B0B0F1F"
 
-
-	error=usbOpenDevice(&handle, USBDEV_SHARED_VENDOR, VENDOR_NAME, USBDEV_SHARED_PRODUCT, PRODUCT_NAME, usbSerialID);
+	error=usbOpenDevice(&handle, USBDEV_SHARED_VENDOR, vendor_name, USBDEV_SHARED_PRODUCT, product_name, usbSerialID);
 	if(error != 0){
-	  fprintf(stderr, "Could not open USB device \"%s\" with vid=0x%x pid=0x%x, retrying\n", PRODUCT_NAME, USBDEV_SHARED_VENDOR, USBDEV_SHARED_PRODUCT);
+	  fprintf(stderr, "Could not open USB device \"%s\" with vid=0x%x pid=0x%x, retrying\n", product_name, USBDEV_SHARED_VENDOR, USBDEV_SHARED_PRODUCT);
 	  sleep(2*attempt);
 	}
   } while (error && attempt < USB_MAX_RETRIES);
