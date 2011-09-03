@@ -1,6 +1,7 @@
 Source: usbsoftrock 
 Section: hamradio 
 Essential: no
+Standards-Version: 3.9.2
 Priority: extra 
 Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
 Build-Depends: debhelper (>= 7.0.50), libc6 (>= 2.3.4), libstdc++6 (>= 4.4.0), libusb-dev
