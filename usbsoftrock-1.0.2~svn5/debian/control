@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 7.0.50), libc6 (>= 2.3.4), libstdc++6 (>= 4.4.0), l
 
 Package: usbsoftrock 
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Recommends: sdr-shell
+Recommends: sdr-shell (>= 4.0)
 Architecture: any
 Homepage: http://code.google.com/p/usbsoftrock/
 Description: Control the Si570 Softrock
