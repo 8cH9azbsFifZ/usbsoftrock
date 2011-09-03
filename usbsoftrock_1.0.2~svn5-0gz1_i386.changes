@@ -1,0 +1,52 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Format: 1.8
+Date: Tue, 24 Aug 2011 23:55:52 +0100
+Source: usbsoftrock
+Binary: usbsoftrock
+Architecture: source i386
+Version: 1.0.2~svn5-0gz1
+Distribution: unstable
+Urgency: low
+Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Changed-By: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Description: 
+ usbsoftrock - Control the Si570 Softrock
+Changes: 
+ usbsoftrock (1.0.2~svn5-0gz1) unstable; urgency=low
+ .
+   * Initial release.
+Checksums-Sha1: 
+ 7582a8f8a01448e27e0ce7237ca43efa8b2f59de 1755 usbsoftrock_1.0.2~svn5-0gz1.dsc
+ 0e3e5d3dfebdaacbfa0ca2781f804f8a9a23baf4 110018 usbsoftrock_1.0.2~svn5.orig.tar.gz
+ 5ef28a2a50805be9cd3a5266322bb798d2fdc62d 50894 usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
+ 7d567dd3c9106a65058968af436196484d96b6ba 15532 usbsoftrock_1.0.2~svn5-0gz1_i386.deb
+Checksums-Sha256: 
+ 3f65a5e46766ae33adf7c0e66c22b275d0eee127f5ddac9549de6861ca03e676 1755 usbsoftrock_1.0.2~svn5-0gz1.dsc
+ 5e9a6b7b27612569e83f44dadd008a7843b5bb36f6a35225f76bb5bfafc4efc8 110018 usbsoftrock_1.0.2~svn5.orig.tar.gz
+ 105e63f530c6124a9422557c6c460cbf4c32989fb166b18fe52bf8414de87b59 50894 usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
+ 6143f52532ba07db011f93e023e680efc15407d2553ff27bb47e7d2821166815 15532 usbsoftrock_1.0.2~svn5-0gz1_i386.deb
+Files: 
+ fe52da517d8296ebeeba3764df35b971 1755 hamradio extra usbsoftrock_1.0.2~svn5-0gz1.dsc
+ 8404375be47f01c12184b759ae90e9d0 110018 hamradio extra usbsoftrock_1.0.2~svn5.orig.tar.gz
+ 0db0f311019a8fcee3c904bb0e059b82 50894 hamradio extra usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
+ 32b9eb19f2c11543257546364a2f465b 15532 hamradio extra usbsoftrock_1.0.2~svn5-0gz1_i386.deb
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iQIcBAEBCAAGBQJOYpMSAAoJEFkTlKde1nyTBpcP+wWz5pnmW4miM30SHDYR4Id1
+Wo8zxQNEtPLwr8m7b3ovG8LRuu6lbtajOM8oMUuDQuG81E5hHCXsuqpeIM/+OPnb
+FdySYXZARwM+h5Zkybg4G3W9ArWS2hZ2FhzVMF0oBOj259YX+8WH3ZwKsZJNKVYZ
+8TSYFznCaNyXhfS1ECsOYC6yb8XbtjsHq19EHcmHjx/hQbxcBRIZuNdmQb9dKUTC
+25+DuxKeUI+5N6laMosBYjhrttcFbp7VJrJDFbv4ECtUJr5i37hr+C+c1Q69IkXb
+f6b8q/5uexL4dcMaHtitE5hBrCOCvfuVHsOiXmxyd4KKfrdkmkacEr6Hsy8Ki3kp
+FdZySVZSeXBfFCY24GWrHDjy1p9WSOjM6Bey0tygDCqai3RKuA0AyYrd7PWa9MHA
+qqPDSRPRUhw58Z0jngFsLgMgTNMiil9AyxKyE6PZcWtRIQfOQxQxdq4WGGTGmyUT
+j+2Us5586Wy0S1np7RuEWINA8KllcMNZrDFZvtDb4baneJK4B6clJACmsM65NNr1
+U49BmvId7ozuNscin2Mz2xTlkFmvVIXLfv21pzdpWNSzrbV5zMwJDARznOdj8SGN
+fkpc4eyUhheeaxNcM/8NDaezDmidIM9YKmcdUHYLREaMICIV2fM1vuUEV/CPKvd+
+/z6oAKOoAJxlr1d/MDPY
+=4wP2
+-----END PGP SIGNATURE-----
