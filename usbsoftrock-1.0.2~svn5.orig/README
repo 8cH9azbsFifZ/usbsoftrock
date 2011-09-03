@@ -1,0 +1,237 @@
+SoftRock USB-I2C Utility
+Andrew Nilsson VK6JBL
+------------------------
+
+This utility for unix platforms is designed for controlling Tony Parks 
+optional I2C adapter for the RXTX 6.3. This interface with the standard
+DG8SAQ firmware was used as the original development platform. I've since
+moved on to using PE0FKO 15.10 and the Mobo software on a AT90USB162.
+
+Development platform was Ubuntu 9.04. Should compile anywhere libusb exists, 
+with adjustments to library includes in the makefile.
+
+The CW Key interface on the board is not supported. A program in this form
+simply wouldn't work. I'm contemplating providing a background daemon version
+which might provide the performance to do this, but it remains to be seen.
+
+My many thanks to everyone who has made these kits what they are. The latest
+enhancements to the 15.x and 16.x firmware result in impressive functionality
+with a straightforward interface once it's configured (once off).
+
+Prerequisites
+-------------
+
+libusb 1.0
+ncurses (and headers i.e. libncurses5-dev package)
+gcc
+
+Installation
+------------
+
+./configure
+make 
+make install
+
+libusb and permissions on linux
+-------------------------------
+
+Because of the default way that Linux assigns permissions to usb devices,
+libusb would require root access to write (effectively all operations).
+Googling libusb and root should give you plenty of hints on how to fix/avoid
+this on various systems.
+
+A good link to read is
+
+http://code.google.com/p/sdr-shell/wiki/HowtoAutomagicallyrunSdrShellonUSBinsertion
+
+Modern Linux systems use udev for hotpluggable device management. Local config
+files should be added in /etc/udev/rules.d. I've added a file on my system 
+/etc/udev/rules.d/51-libusb.rules that contains the following:
+
+SYSFS{idVendor}=="16c0", SYSFS{idProduct}=="05dc", MODE="660", GROUP="andrew"
+
+This instructs udev to assign enable group members as well as the owner to 
+write to the create device, and the group should be andrew (my login group). 
+Adjust as you see fit. 
+
+Usage
+-----
+
+usage: ./usbsoftrock [OPTION] COMMAND
+
+OPTION is one or more of
+  -a                             Advanced firmware present
+                                 i.e. let the firmware calculate registers
+  -d                             Enter a mode that listens for commands via UDP.
+  -h <freq MHz>                  Enable subharmonic (/3) sampling from frequency (DEFAULT off)
+  -i <address>                   I2C address in DECIMAL (DEFAULT = 85 (0x55))
+  -m <multiplier>                Multiplication factor for frequency (DEFAULT = 4)
+  -p <port num>                  Port to listen for UDP datagrams (DEFAULT = 19004)
+  -s <startup frequency MHz>     Factory programmed startup frequency (DEFAULT = 56.32)
+  -v                             Verbose output (fairly useful)
+  -vv                            Even more verbose output (debugging)
+  -x <calibrated xtall freq MHz> Corrected XTALL frequency of Si570 device calculated
+                                 through the use of the calibrate command immediately
+                                 after startup.
+COMMAND is one of
+  calibrate (may require -s option)
+  getfreq
+  getregisters
+  interactive
+  ptt {on|off}
+  set bpf {on|off}                       (PE0FKO only)
+  set freq <frequency in MHz>
+  set si570_multiplier <decimal factor>  (PE0FKO only)
+  set startup <frequency in MHz>         (PE0FKO only)
+  set xtall <frequency in MHz>           (PE0FKO only)
+  status
+
+Examples
+--------
+
+Original DG8SAQ Firmware
+------------------------
+
+Turn on softrock, plug in usb-i2c interface
+usbsoftrock calibrate
+
+Or if you have a different startup freq than 56.32
+usbsoftrock -s 40.000 calibrate
+
+It will return something like
+fXTALL = 114.182074
+
+Then take the value from that and use the following:
+
+usbsoftrock -x 114.182074 getfreq
+usbsoftrock -x 114.182074 setfreq 14.040
+ 
+By default the program will calculate the Si570 register values locally when 
+setting the frequency. If you specify option -a (advanced firmware) then it
+will use the set frequency by value command and let the interface calculate 
+the registers. This enables features such as automatic BPF selection and 
+smooth tuning in Fred PE0FKO's firmware.
+
+PE0FKO Usage
+------------
+
+Additional Support with v15.10:
+
+* set startup freq
+  Sets the frequency of the si570 on startup
+
+* set si570_multiplier <decimal factor>
+  Sets the oscillator multiplier value in the attiny firmware.
+
+* set xtall freq
+  Set the calibrated oscillator value
+
+* set bpf {on|off}
+  Enable or disable the BPF filter. Needs to be disabled for RXTX 6.3 otherwise changing
+  frequency will sometimes key the transmitter (by default).
+
+* set bpf_point <index> <freq MHz>
+  Set the crossover frequency for index. 4 BPF means 3 cross over points 0, 1, 2
+  e.g. the following would set it up as the default for the electronically switched
+  BPF kit from Tony:
+  set bpf_point 0 4.0
+  set bpf_point 1 8.0
+  set bpf_point 2 16.0
+  
+* -a flag forces use of the set/get freq by value commands which is a more generic interface.
+  Recommended for this firmware, especially if the xtall freq has been stored in the device 
+  as you no longer need to specify -x on the command line.
+
+Additional Support with v15.12, TF3LJ or Mobo AT90USB162 Variants
+
+* set lpf_addr
+* set lpf_point
+* set lpf [on|off]
+* set bpf_addr
+
+* set si570_multiplier <band> <decimal factor>
+  Sets the oscillator multiplier value in the attiny firmware for the 
+  band specified. For 4 BPF this would be 0, 1, 2, 3.
+  If you use this then you probably want to use option "-m 1" to disable the 
+  default x 4 multiplication inside usbsoftrock.
+  
+Calibration is the same as the other firmware, however one has the option to
+store the crystal frequency in the firmware.
+
+usbsoftrock calibrate
+usbsoftrock set xtall 114.182074
+
+and the startup frequency can be changed from the default 7.050 to something else:
+
+usbsoftrock set startup 14.080
+
+Since I use an RXTX 6.3:
+usbsoftrock set bpf off
+
+Afterwards the status command will produce something like:
+
+andrew@msi-wind:~/dev/usbsoftrock$ ./usbsoftrock status
+Version     : 15.10
+Frequency   : 14.080000 (x 4.00)
+Startup Freq: 14.080000 (x 4.00)
+Xtall Freq  : 114.182074
+Smooth Tune : 3500 PPM
+LO Subtract : 0.000000
+Multiply    : 1.000000
+Filter Bank 1:
+  CrossOver[0] = 16.000000
+  CrossOver[1] = 32.000000
+  CrossOver[2] = 64.000000
+  BPF Enabled: 0
+
+6m ABPF Example (15.12)
+-----------------------
+
+I built my ABPF kit for 80-6M with 6m as filter #4, not as sepecified
+in the builders notes.
+
+Once off config:
+
+usbsoftrock set bpf_point 0 8.0
+usbsoftrock set bpf_point 1 16.0
+usbsoftrock set bpf_point 2 35.0
+usbsoftrock set bpf on
+
+usbsoftrock set si570_multiplier 0 4.0
+usbsoftrock set si570_multiplier 1 4.0
+usbsoftrock set si570_multiplier 2 4.0
+usbsoftrock set si570_multiplier 3 1.33333
+
+This will give me subharmonic sampling (/3) on 6m and allow direct 
+frequency setting as follows
+
+usbsoftrock -m 1 -a set freq 50.050
+i.e. set CF to 50.050 received = 66.7333 Si570 output
+     -m 1 disables any multiplication in usbsoftrock and lets the 
+
+Interactive Mode
+----------------
+
+usbsoftrock -a interactive
+
+will enter a curses based screen enabling continous tuning in 100kHz, 10khz, 1kHz, 100 and 10Hz with the q,a,w,s,e,d,r,f,t,g keys as in PowerSDR. 
+x will exit.
+p will toggle ptt on/off.
+
+UDP Interface
+-------------
+
+Specifying the -d flag will put usbsoftrock into a mode where it listen by default on port 19004 for UDP datagrams. The port can be changed by the -p option.
+
+A subset of features is available as commands (to be sent individually in each datagram):
+set ptt on|off
+set bpf on|off
+set freq xxxxxxx
+get freq
+quit
+
+Usbsoftrock will respond to a UDP request with either a datagram beginning with either ok or error. In the case of get freq, the frequency will be after the ok i.e. "ok 14.080"
+
+This interface is deliberately intended to be similar to the update/command protocol in the AB2KT branch of DTTSP in order to simplify writing clients.
+
+If/when I get around to packaging this up as a true daemon, I would imagine there exists the potential to tie this in to linux's device management and have it start and stop automatically on plugging such a device in.
