@@ -24,4 +24,5 @@ lintian  *deb
 
 for f in *changes; do
 dput -l debexpo $f
+dput -l ubuntu $f
 done

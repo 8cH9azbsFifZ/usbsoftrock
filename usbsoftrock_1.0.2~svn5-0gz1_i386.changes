@@ -18,35 +18,35 @@ Changes:
  .
    * Initial release.
 Checksums-Sha1: 
- 7582a8f8a01448e27e0ce7237ca43efa8b2f59de 1755 usbsoftrock_1.0.2~svn5-0gz1.dsc
+ 9e11e54ebaff8bea5d76ae73d7bb95bc72d7a797 1755 usbsoftrock_1.0.2~svn5-0gz1.dsc
  0e3e5d3dfebdaacbfa0ca2781f804f8a9a23baf4 110018 usbsoftrock_1.0.2~svn5.orig.tar.gz
- 5ef28a2a50805be9cd3a5266322bb798d2fdc62d 50894 usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
- 7d567dd3c9106a65058968af436196484d96b6ba 15532 usbsoftrock_1.0.2~svn5-0gz1_i386.deb
+ caa8a3175af4408adf4b606fcaaf4df3a7735830 50897 usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
+ 0a782ff68939159b091b0ace22fa2b34dda64b89 15532 usbsoftrock_1.0.2~svn5-0gz1_i386.deb
 Checksums-Sha256: 
- 3f65a5e46766ae33adf7c0e66c22b275d0eee127f5ddac9549de6861ca03e676 1755 usbsoftrock_1.0.2~svn5-0gz1.dsc
+ 83214eda3d26464dba49cd1fa26a290dace1b978cca05bf1993950b25f76c641 1755 usbsoftrock_1.0.2~svn5-0gz1.dsc
  5e9a6b7b27612569e83f44dadd008a7843b5bb36f6a35225f76bb5bfafc4efc8 110018 usbsoftrock_1.0.2~svn5.orig.tar.gz
- 105e63f530c6124a9422557c6c460cbf4c32989fb166b18fe52bf8414de87b59 50894 usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
- 6143f52532ba07db011f93e023e680efc15407d2553ff27bb47e7d2821166815 15532 usbsoftrock_1.0.2~svn5-0gz1_i386.deb
+ 2c30a9aea710f252d5ffe9141c72ecb77d3297f27fa16e2a21a263f41b643db5 50897 usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
+ 22962a909269f4708306b53a070147aed25fa9f906ee8949ee3e01b5eaeb7355 15532 usbsoftrock_1.0.2~svn5-0gz1_i386.deb
 Files: 
- fe52da517d8296ebeeba3764df35b971 1755 hamradio extra usbsoftrock_1.0.2~svn5-0gz1.dsc
+ d3f05c9985e86bb51f73cb13c1b4b458 1755 hamradio extra usbsoftrock_1.0.2~svn5-0gz1.dsc
  8404375be47f01c12184b759ae90e9d0 110018 hamradio extra usbsoftrock_1.0.2~svn5.orig.tar.gz
- 0db0f311019a8fcee3c904bb0e059b82 50894 hamradio extra usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
- 32b9eb19f2c11543257546364a2f465b 15532 hamradio extra usbsoftrock_1.0.2~svn5-0gz1_i386.deb
+ c65cc8d49e84ab1a9eb2d171f0bbe930 50897 hamradio extra usbsoftrock_1.0.2~svn5-0gz1.debian.tar.gz
+ 087720116db85f4d44e20630f65650b7 15532 hamradio extra usbsoftrock_1.0.2~svn5-0gz1_i386.deb
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iQIcBAEBCAAGBQJOYpMSAAoJEFkTlKde1nyTBpcP+wWz5pnmW4miM30SHDYR4Id1
-Wo8zxQNEtPLwr8m7b3ovG8LRuu6lbtajOM8oMUuDQuG81E5hHCXsuqpeIM/+OPnb
-FdySYXZARwM+h5Zkybg4G3W9ArWS2hZ2FhzVMF0oBOj259YX+8WH3ZwKsZJNKVYZ
-8TSYFznCaNyXhfS1ECsOYC6yb8XbtjsHq19EHcmHjx/hQbxcBRIZuNdmQb9dKUTC
-25+DuxKeUI+5N6laMosBYjhrttcFbp7VJrJDFbv4ECtUJr5i37hr+C+c1Q69IkXb
-f6b8q/5uexL4dcMaHtitE5hBrCOCvfuVHsOiXmxyd4KKfrdkmkacEr6Hsy8Ki3kp
-FdZySVZSeXBfFCY24GWrHDjy1p9WSOjM6Bey0tygDCqai3RKuA0AyYrd7PWa9MHA
-qqPDSRPRUhw58Z0jngFsLgMgTNMiil9AyxKyE6PZcWtRIQfOQxQxdq4WGGTGmyUT
-j+2Us5586Wy0S1np7RuEWINA8KllcMNZrDFZvtDb4baneJK4B6clJACmsM65NNr1
-U49BmvId7ozuNscin2Mz2xTlkFmvVIXLfv21pzdpWNSzrbV5zMwJDARznOdj8SGN
-fkpc4eyUhheeaxNcM/8NDaezDmidIM9YKmcdUHYLREaMICIV2fM1vuUEV/CPKvd+
-/z6oAKOoAJxlr1d/MDPY
-=4wP2
+iQIcBAEBCAAGBQJOYpnBAAoJEFkTlKde1nyTZVMP/2rK5juk/zrv+IX7AOGebG4a
+OWJmNzoXqiQpjaYIlJA7SdeW/VEscoDuTxSpwlzm1KqmqTNnLCB+z1UVYfb7QlkE
+dTyk133rY/4WReQCiVjPAJc0u4vAbym2MrXDAb/AHinMz1Ahgouct0LGKJNp5Vlx
+47WH8CWKc0OeHirsqtSw3Irmr8R1l1IK5abRAY4oX90UjBQrcwqhADg/dxTgA7Pj
+l47JvMOHZUwoErXEKRuq4rnjQlGiE3AaILJq12E4O5nfAfg/vefrK/l0TI6cyr5v
+kpf4rafOpT856+EoLzCzLCQzDlgDyGRNjKqPCqqSS0qxJQKjUS5Sx22jCcScoZwY
+zsM2blcHSuh2MO648FA5+YCqF0rjQFTYf8MVRyvHUVLdOo1n+8g7pWgnlvCWDffL
+vJ6Kqip/6tAK8EGvFiENpwOUxLsIHTpcS8ey1y+PWcFsdnsay4dIUi7ukdAnTlPD
+r1DTO4vRa7WeVttvZvtqPptarMS5OcIzCSOC7dEESaf0pA5NxWGSsV4+YVw6JA+f
+psaflTLHl4GOM0xEVhMyZSdg7kStDXsswPykU5ZWbuF/KY7DDEeIYSpRjdLdtJP0
+/r6aw5c9fjepLh1fOIFkFRaUYa00h0IZCGyypH7qAmyilNyOnHg2VIRnVr7rnax8
+OkPZQcMKRw/t6iCagmsG
+=L/Ho
 -----END PGP SIGNATURE-----
