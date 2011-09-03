@@ -8,7 +8,7 @@ rm debian/debhelper.log
 
 #checksum not updated
 debuild
-#debuild -S
+debuild -S
 #dpkg-buildpackage
 
 cd ..
@@ -23,5 +23,5 @@ lintian --pedantic --all *dsc
 lintian  *deb
 
 for f in *changes; do
-dput -l debexpo $f
+#dput -l debexpo $f
 done
