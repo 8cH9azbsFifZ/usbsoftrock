@@ -21,6 +21,304 @@ changes mixed together.
 -AC_CONFIG_FILES([Makefile])
 +AC_CONFIG_FILES([Makefile src/Makefile])
  AC_OUTPUT
+--- usbsoftrock-1.0.2~svn5.orig/INSTALL
++++ usbsoftrock-1.0.2~svn5/INSTALL
+@@ -1,291 +1,5 @@
+-Installation Instructions
+-*************************
+-
+-Copyright (C) 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2004, 2005,
+-2006, 2007, 2008 Free Software Foundation, Inc.
+-
+-   This file is free documentation; the Free Software Foundation gives
+-unlimited permission to copy, distribute and modify it.
+-
+-Basic Installation
+-==================
+-
+-   Briefly, the shell commands `./configure; make; make install' should
+-configure, build, and install this package.  The following
+-more-detailed instructions are generic; see the `README' file for
+-instructions specific to this package.
+-
+-   The `configure' shell script attempts to guess correct values for
+-various system-dependent variables used during compilation.  It uses
+-those values to create a `Makefile' in each directory of the package.
+-It may also create one or more `.h' files containing system-dependent
+-definitions.  Finally, it creates a shell script `config.status' that
+-you can run in the future to recreate the current configuration, and a
+-file `config.log' containing compiler output (useful mainly for
+-debugging `configure').
+-
+-   It can also use an optional file (typically called `config.cache'
+-and enabled with `--cache-file=config.cache' or simply `-C') that saves
+-the results of its tests to speed up reconfiguring.  Caching is
+-disabled by default to prevent problems with accidental use of stale
+-cache files.
+-
+-   If you need to do unusual things to compile the package, please try
+-to figure out how `configure' could check whether to do them, and mail
+-diffs or instructions to the address given in the `README' so they can
+-be considered for the next release.  If you are using the cache, and at
+-some point `config.cache' contains results you don't want to keep, you
+-may remove or edit it.
+-
+-   The file `configure.ac' (or `configure.in') is used to create
+-`configure' by a program called `autoconf'.  You need `configure.ac' if
+-you want to change it or regenerate `configure' using a newer version
+-of `autoconf'.
+-
+-The simplest way to compile this package is:
+-
+-  1. `cd' to the directory containing the package's source code and type
+-     `./configure' to configure the package for your system.
+-
+-     Running `configure' might take a while.  While running, it prints
+-     some messages telling which features it is checking for.
+-
+-  2. Type `make' to compile the package.
+-
+-  3. Optionally, type `make check' to run any self-tests that come with
+-     the package.
+-
+-  4. Type `make install' to install the programs and any data files and
+-     documentation.
+-
+-  5. You can remove the program binaries and object files from the
+-     source code directory by typing `make clean'.  To also remove the
+-     files that `configure' created (so you can compile the package for
+-     a different kind of computer), type `make distclean'.  There is
+-     also a `make maintainer-clean' target, but that is intended mainly
+-     for the package's developers.  If you use it, you may have to get
+-     all sorts of other programs in order to regenerate files that came
+-     with the distribution.
+-
+-  6. Often, you can also type `make uninstall' to remove the installed
+-     files again.
+-
+-Compilers and Options
+-=====================
+-
+-   Some systems require unusual options for compilation or linking that
+-the `configure' script does not know about.  Run `./configure --help'
+-for details on some of the pertinent environment variables.
+-
+-   You can give `configure' initial values for configuration parameters
+-by setting variables in the command line or in the environment.  Here
+-is an example:
+-
+-     ./configure CC=c99 CFLAGS=-g LIBS=-lposix
+-
+-   *Note Defining Variables::, for more details.
+-
+-Compiling For Multiple Architectures
+-====================================
+-
+-   You can compile the package for more than one kind of computer at the
+-same time, by placing the object files for each architecture in their
+-own directory.  To do this, you can use GNU `make'.  `cd' to the
+-directory where you want the object files and executables to go and run
+-the `configure' script.  `configure' automatically checks for the
+-source code in the directory that `configure' is in and in `..'.
+-
+-   With a non-GNU `make', it is safer to compile the package for one
+-architecture at a time in the source code directory.  After you have
+-installed the package for one architecture, use `make distclean' before
+-reconfiguring for another architecture.
+-
+-   On MacOS X 10.5 and later systems, you can create libraries and
+-executables that work on multiple system types--known as "fat" or
+-"universal" binaries--by specifying multiple `-arch' options to the
+-compiler but only a single `-arch' option to the preprocessor.  Like
+-this:
+-
+-     ./configure CC="gcc -arch i386 -arch x86_64 -arch ppc -arch ppc64" \
+-                 CXX="g++ -arch i386 -arch x86_64 -arch ppc -arch ppc64" \
+-                 CPP="gcc -E" CXXCPP="g++ -E"
+-
+-   This is not guaranteed to produce working output in all cases, you
+-may have to build one architecture at a time and combine the results
+-using the `lipo' tool if you have problems.
+-
+-Installation Names
+-==================
+-
+-   By default, `make install' installs the package's commands under
+-`/usr/local/bin', include files under `/usr/local/include', etc.  You
+-can specify an installation prefix other than `/usr/local' by giving
+-`configure' the option `--prefix=PREFIX'.
+-
+-   You can specify separate installation prefixes for
+-architecture-specific files and architecture-independent files.  If you
+-pass the option `--exec-prefix=PREFIX' to `configure', the package uses
+-PREFIX as the prefix for installing programs and libraries.
+-Documentation and other data files still use the regular prefix.
+-
+-   In addition, if you use an unusual directory layout you can give
+-options like `--bindir=DIR' to specify different values for particular
+-kinds of files.  Run `configure --help' for a list of the directories
+-you can set and what kinds of files go in them.
+-
+-   If the package supports it, you can cause programs to be installed
+-with an extra prefix or suffix on their names by giving `configure' the
+-option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.
+-
+-Optional Features
+-=================
+-
+-   Some packages pay attention to `--enable-FEATURE' options to
+-`configure', where FEATURE indicates an optional part of the package.
+-They may also pay attention to `--with-PACKAGE' options, where PACKAGE
+-is something like `gnu-as' or `x' (for the X Window System).  The
+-`README' should mention any `--enable-' and `--with-' options that the
+-package recognizes.
+-
+-   For packages that use the X Window System, `configure' can usually
+-find the X include and library files automatically, but if it doesn't,
+-you can use the `configure' options `--x-includes=DIR' and
+-`--x-libraries=DIR' to specify their locations.
+-
+-Particular systems
+-==================
+-
+-   On HP-UX, the default C compiler is not ANSI C compatible.  If GNU
+-CC is not installed, it is recommended to use the following options in
+-order to use an ANSI C compiler:
+-
+-     ./configure CC="cc -Ae"
+-
+-and if that doesn't work, install pre-built binaries of GCC for HP-UX.
+-
+-   On OSF/1 a.k.a. Tru64, some versions of the default C compiler cannot
+-parse its `<wchar.h>' header file.  The option `-nodtk' can be used as
+-a workaround.  If GNU CC is not installed, it is therefore recommended
+-to try
+-
+-     ./configure CC="cc"
+-
+-and if that doesn't work, try
+-
+-     ./configure CC="cc -nodtk"
+-
+-Specifying the System Type
+-==========================
+-
+-   There may be some features `configure' cannot figure out
+-automatically, but needs to determine by the type of machine the package
+-will run on.  Usually, assuming the package is built to be run on the
+-_same_ architectures, `configure' can figure that out, but if it prints
+-a message saying it cannot guess the machine type, give it the
+-`--build=TYPE' option.  TYPE can either be a short name for the system
+-type, such as `sun4', or a canonical name which has the form:
+-
+-     CPU-COMPANY-SYSTEM
+-
+-where SYSTEM can have one of these forms:
+-
+-     OS KERNEL-OS
+-
+-   See the file `config.sub' for the possible values of each field.  If
+-`config.sub' isn't included in this package, then this package doesn't
+-need to know the machine type.
+-
+-   If you are _building_ compiler tools for cross-compiling, you should
+-use the option `--target=TYPE' to select the type of system they will
+-produce code for.
+-
+-   If you want to _use_ a cross compiler, that generates code for a
+-platform different from the build platform, you should specify the
+-"host" platform (i.e., that on which the generated programs will
+-eventually be run) with `--host=TYPE'.
+-
+-Sharing Defaults
+-================
+-
+-   If you want to set default values for `configure' scripts to share,
+-you can create a site shell script called `config.site' that gives
+-default values for variables like `CC', `cache_file', and `prefix'.
+-`configure' looks for `PREFIX/share/config.site' if it exists, then
+-`PREFIX/etc/config.site' if it exists.  Or, you can set the
+-`CONFIG_SITE' environment variable to the location of the site script.
+-A warning: not all `configure' scripts look for a site script.
+-
+-Defining Variables
+-==================
+-
+-   Variables not defined in a site shell script can be set in the
+-environment passed to `configure'.  However, some packages may run
+-configure again during the build, and the customized values of these
+-variables may be lost.  In order to avoid this problem, you should set
+-them in the `configure' command line, using `VAR=value'.  For example:
+-
+-     ./configure CC=/usr/local2/bin/gcc
+-
+-causes the specified `gcc' to be used as the C compiler (unless it is
+-overridden in the site shell script).
+-
+-Unfortunately, this technique does not work for `CONFIG_SHELL' due to
+-an Autoconf bug.  Until the bug is fixed you can use this workaround:
+-
+-     CONFIG_SHELL=/bin/bash /bin/bash ./configure CONFIG_SHELL=/bin/bash
+-
+-`configure' Invocation
+-======================
+-
+-   `configure' recognizes the following options to control how it
+-operates.
+-
+-`--help'
+-`-h'
+-     Print a summary of all of the options to `configure', and exit.
+-
+-`--help=short'
+-`--help=recursive'
+-     Print a summary of the options unique to this package's
+-     `configure', and exit.  The `short' variant lists options used
+-     only in the top level, while the `recursive' variant lists options
+-     also present in any nested packages.
+-
+-`--version'
+-`-V'
+-     Print the version of Autoconf used to generate the `configure'
+-     script, and exit.
+-
+-`--cache-file=FILE'
+-     Enable the cache: use and save the results of the tests in FILE,
+-     traditionally `config.cache'.  FILE defaults to `/dev/null' to
+-     disable caching.
+-
+-`--config-cache'
+-`-C'
+-     Alias for `--cache-file=config.cache'.
+-
+-`--quiet'
+-`--silent'
+-`-q'
+-     Do not print messages saying which checks are being made.  To
+-     suppress all normal output, redirect it to `/dev/null' (any error
+-     messages will still be shown).
+-
+-`--srcdir=DIR'
+-     Look for the package's source code in directory DIR.  Usually
+-     `configure' can determine that directory automatically.
+-
+-`--prefix=DIR'
+-     Use DIR as the installation prefix.  *Note Installation Names::
+-     for more details, including other options available for fine-tuning
+-     the installation locations.
+-
+-`--no-create'
+-`-n'
+-     Run the configure checks, but stop before creating any output
+-     files.
+-
+-`configure' also accepts some other, not widely useful, options.  Run
+-`configure --help' for more details.
++Linux - Debian
++==============
++   Packages needed to build usbsoftrock:
++        sudo apt-get install libusb++-dev libncurses5-dev
+ 
 --- usbsoftrock-1.0.2~svn5.orig/install-sh
 +++ usbsoftrock-1.0.2~svn5/install-sh
 @@ -1,7 +1,7 @@
@@ -74,8 +372,8 @@ changes mixed together.
    [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
 -m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.64],,
 -[m4_warning([this file was generated for autoconf 2.64.
-+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.67],,
-+[m4_warning([this file was generated for autoconf 2.67.
++m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.68],,
++[m4_warning([this file was generated for autoconf 2.68.
  You have another version of autoconf.  It may work, but is not guaranteed to.
  If you have problems, you may need to regenerate the build system entirely.
  To do so, use the procedure documented by the package, typically `autoreconf'.])])
@@ -85,11 +383,14 @@ changes mixed together.
  # 
  # Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
  #
-@@ -47,7 +48,10 @@ To do so, use the procedure documented b
+@@ -46,8 +47,12 @@ To do so, use the procedure documented b
+ # ----------------------------------
  AC_DEFUN([PKG_PROG_PKG_CONFIG],
  [m4_pattern_forbid([^_?PKG_[A-Z_]+$])
- m4_pattern_allow([^PKG_CONFIG(_PATH)?$])
+-m4_pattern_allow([^PKG_CONFIG(_PATH)?$])
 -AC_ARG_VAR([PKG_CONFIG], [path to pkg-config utility])dnl
++m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
++m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
 +AC_ARG_VAR([PKG_CONFIG], [path to pkg-config utility])
 +AC_ARG_VAR([PKG_CONFIG_PATH], [directories to add to pkg-config's search path])
 +AC_ARG_VAR([PKG_CONFIG_LIBDIR], [path overriding pkg-config's built-in search path])
@@ -97,7 +398,7 @@ changes mixed together.
  if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
  	AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
  fi
-@@ -60,7 +64,6 @@ if test -n "$PKG_CONFIG"; then
+@@ -60,7 +65,6 @@ if test -n "$PKG_CONFIG"; then
  		AC_MSG_RESULT([no])
  		PKG_CONFIG=""
  	fi
@@ -105,7 +406,7 @@ changes mixed together.
  fi[]dnl
  ])# PKG_PROG_PKG_CONFIG
  
-@@ -69,34 +72,31 @@ fi[]dnl
+@@ -69,34 +73,32 @@ fi[]dnl
  # Check to see whether a particular set of modules exists.  Similar
  # to PKG_CHECK_MODULES(), but does not set variables or print errors.
  #
@@ -146,14 +447,15 @@ changes mixed together.
 +    pkg_cv_[]$1="$$1"
 + elif test -n "$PKG_CONFIG"; then
 +    PKG_CHECK_EXISTS([$3],
-+                     [pkg_cv_[]$1=`$PKG_CONFIG --[]$2 "$3" 2>/dev/null`],
++                     [pkg_cv_[]$1=`$PKG_CONFIG --[]$2 "$3" 2>/dev/null`
++		      test "x$?" != "x0" && pkg_failed=yes ],
 +		     [pkg_failed=yes])
 + else
 +    pkg_failed=untried
  fi[]dnl
  ])# _PKG_CONFIG
  
-@@ -138,16 +138,17 @@ and $1[]_LIBS to avoid the need to call
+@@ -138,16 +140,17 @@ and $1[]_LIBS to avoid the need to call
  See the pkg-config man page for more details.])
  
  if test $pkg_failed = yes; then
@@ -161,10 +463,10 @@ changes mixed together.
          _PKG_SHORT_ERRORS_SUPPORTED
          if test $_pkg_short_errors_supported = yes; then
 -	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "$2"`
-+	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "$2" 2>&1`
++	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "$2" 2>&1`
          else 
 -	        $1[]_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "$2"`
-+	        $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors "$2" 2>&1`
++	        $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "$2" 2>&1`
          fi
  	# Put the nasty error message in config.log where it belongs
  	echo "$$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
@@ -174,7 +476,7 @@ changes mixed together.
  [Package requirements ($2) were not met:
  
  $$1_PKG_ERRORS
-@@ -155,25 +156,24 @@ $$1_PKG_ERRORS
+@@ -155,25 +158,24 @@ $$1_PKG_ERRORS
  Consider adjusting the PKG_CONFIG_PATH environment variable if you
  installed software in a non-standard prefix.
  
@@ -207,7 +509,7 @@ changes mixed together.
  fi[]dnl
  ])# PKG_CHECK_MODULES
  
-@@ -192,7 +192,7 @@ AC_DEFUN([AM_AUTOMAKE_VERSION],
+@@ -192,7 +194,7 @@ AC_DEFUN([AM_AUTOMAKE_VERSION],
  [am__api_version='1.11'
  dnl Some users find AM_AUTOMAKE_VERSION and mistake it for a way to
  dnl require some minimum version.  Point them to the right macro.
@@ -216,7 +518,7 @@ changes mixed together.
        [AC_FATAL([Do not call $0, use AM_INIT_AUTOMAKE([$1]).])])dnl
  ])
  
-@@ -208,7 +208,7 @@ m4_define([_AM_AUTOCONF_VERSION], [])
+@@ -208,7 +210,7 @@ m4_define([_AM_AUTOCONF_VERSION], [])
  # Call AM_AUTOMAKE_VERSION and AM_AUTOMAKE_VERSION so they can be traced.
  # This function is AC_REQUIREd by AM_INIT_AUTOMAKE.
  AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
@@ -1212,10 +1514,11 @@ changes mixed together.
  fi
  rm -f conftest.$ac_cv_objext conftest.$ac_ext
  fi
-@@ -3720,6 +3762,10 @@ fi
+@@ -3720,6 +3762,11 @@ fi
  
  
  
++
 +
 +
 +
@@ -1223,7 +1526,7 @@ changes mixed together.
  if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
  	if test -n "$ac_tool_prefix"; then
    # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
-@@ -3832,18 +3878,16 @@ $as_echo "yes" >&6; }
+@@ -3832,53 +3879,52 @@ $as_echo "yes" >&6; }
  $as_echo "no" >&6; }
  		PKG_CONFIG=""
  	fi
@@ -1246,7 +1549,10 @@ changes mixed together.
      { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libusb\""; } >&5
    ($PKG_CONFIG --exists --print-errors "libusb") 2>&5
    ac_status=$?
-@@ -3853,15 +3897,13 @@ if test -n "$PKG_CONFIG"; then
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+   pkg_cv_libusb_CFLAGS=`$PKG_CONFIG --cflags "libusb" 2>/dev/null`
++		      test "x$?" != "x0" && pkg_failed=yes
  else
    pkg_failed=yes
  fi
@@ -1268,7 +1574,10 @@ changes mixed together.
      { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libusb\""; } >&5
    ($PKG_CONFIG --exists --print-errors "libusb") 2>&5
    ac_status=$?
-@@ -3871,14 +3913,15 @@ if test -n "$PKG_CONFIG"; then
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+   pkg_cv_libusb_LIBS=`$PKG_CONFIG --libs "libusb" 2>/dev/null`
++		      test "x$?" != "x0" && pkg_failed=yes
  else
    pkg_failed=yes
  fi
@@ -1287,15 +1596,15 @@ changes mixed together.
  
  if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
          _pkg_short_errors_supported=yes
-@@ -3886,16 +3929,14 @@ else
+@@ -3886,16 +3932,14 @@ else
          _pkg_short_errors_supported=no
  fi
          if test $_pkg_short_errors_supported = yes; then
 -	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "libusb"`
-+	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libusb" 2>&1`
++	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libusb" 2>&1`
          else
 -	        libusb_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "libusb"`
-+	        libusb_PKG_ERRORS=`$PKG_CONFIG --print-errors "libusb" 2>&1`
++	        libusb_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libusb" 2>&1`
          fi
  	# Put the nasty error message in config.log where it belongs
  	echo "$libusb_PKG_ERRORS" >&5
@@ -1307,7 +1616,7 @@ changes mixed together.
  $as_echo_n "checking for main in -lusb... " >&6; }
  if test "${ac_cv_lib_usb_main+set}" = set; then :
    $as_echo_n "(cached) " >&6
-@@ -3938,6 +3979,8 @@ fi
+@@ -3938,6 +3982,8 @@ fi
  
  
  elif test $pkg_failed = untried; then
@@ -1316,7 +1625,7 @@ changes mixed together.
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lusb" >&5
  $as_echo_n "checking for main in -lusb... " >&6; }
  if test "${ac_cv_lib_usb_main+set}" = set; then :
-@@ -4040,7 +4083,7 @@ else
+@@ -4040,7 +4086,7 @@ else
    # Broken: fails on valid input.
  continue
  fi
@@ -1325,7 +1634,7 @@ changes mixed together.
  
    # OK, works on sane cases.  Now check whether nonexistent headers
    # can be detected and how.
-@@ -4056,11 +4099,11 @@ else
+@@ -4056,11 +4102,11 @@ else
  ac_preproc_ok=:
  break
  fi
@@ -1339,7 +1648,7 @@ changes mixed together.
  if $ac_preproc_ok; then :
    break
  fi
-@@ -4099,7 +4142,7 @@ else
+@@ -4099,7 +4145,7 @@ else
    # Broken: fails on valid input.
  continue
  fi
@@ -1348,7 +1657,7 @@ changes mixed together.
  
    # OK, works on sane cases.  Now check whether nonexistent headers
    # can be detected and how.
-@@ -4115,18 +4158,18 @@ else
+@@ -4115,18 +4161,18 @@ else
  ac_preproc_ok=:
  break
  fi
@@ -1371,7 +1680,7 @@ changes mixed together.
  fi
  
  ac_ext=c
-@@ -4187,7 +4230,7 @@ esac
+@@ -4187,7 +4233,7 @@ esac
    done
  IFS=$as_save_IFS
    if test -z "$ac_cv_path_GREP"; then
@@ -1380,7 +1689,7 @@ changes mixed together.
    fi
  else
    ac_cv_path_GREP=$GREP
-@@ -4253,7 +4296,7 @@ esac
+@@ -4253,7 +4299,7 @@ esac
    done
  IFS=$as_save_IFS
    if test -z "$ac_cv_path_EGREP"; then
@@ -1389,7 +1698,7 @@ changes mixed together.
    fi
  else
    ac_cv_path_EGREP=$EGREP
-@@ -4385,8 +4428,7 @@ do :
+@@ -4385,8 +4431,7 @@ do :
    as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
  ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
  "
@@ -1399,7 +1708,7 @@ changes mixed together.
    cat >>confdefs.h <<_ACEOF
  #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
  _ACEOF
-@@ -4400,8 +4442,7 @@ for ac_header in stdlib.h string.h unist
+@@ -4400,8 +4445,7 @@ for ac_header in stdlib.h string.h unist
  do :
    as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
  ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -1409,7 +1718,7 @@ changes mixed together.
    cat >>confdefs.h <<_ACEOF
  #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
  _ACEOF
-@@ -4415,7 +4456,7 @@ done
+@@ -4415,7 +4459,7 @@ done
  
  # Checks for library functions.
  
@@ -1418,7 +1727,7 @@ changes mixed together.
  
  cat >confcache <<\_ACEOF
  # This file is a shell script that caches the results of configure
-@@ -4500,6 +4541,7 @@ DEFS=-DHAVE_CONFIG_H
+@@ -4500,6 +4544,7 @@ DEFS=-DHAVE_CONFIG_H
  
  ac_libobjs=
  ac_ltlibobjs=
@@ -1426,7 +1735,7 @@ changes mixed together.
  for ac_i in : $LIBOBJS; do test "x$ac_i" = x: && continue
    # 1. Remove the extension, and $U if already installed.
    ac_script='s/\$U\././;s/\.o$//;s/\.obj$//'
-@@ -4523,11 +4565,11 @@ else
+@@ -4523,11 +4568,11 @@ else
  fi
  
  if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
@@ -1440,7 +1749,7 @@ changes mixed together.
  Usually this means the macro was only invoked conditionally." "$LINENO" 5
  fi
  
-@@ -4677,19 +4719,19 @@ export LANGUAGE
+@@ -4677,19 +4722,19 @@ export LANGUAGE
  (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
  
  
@@ -1468,7 +1777,7 @@ changes mixed together.
    as_fn_exit $as_status
  } # as_fn_error
  
-@@ -4885,7 +4927,7 @@ $as_echo X"$as_dir" |
+@@ -4885,7 +4930,7 @@ $as_echo X"$as_dir" |
        test -d "$as_dir" && break
      done
      test -z "$as_dirs" || eval "mkdir $as_dirs"
@@ -1477,7 +1786,7 @@ changes mixed together.
  
  
  } # as_fn_mkdir_p
-@@ -4939,7 +4981,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_wri
+@@ -4939,7 +4984,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_wri
  # values after options handling.
  ac_log="
  This file was extended by $as_me, which was
@@ -1486,7 +1795,7 @@ changes mixed together.
  
    CONFIG_FILES    = $CONFIG_FILES
    CONFIG_HEADERS  = $CONFIG_HEADERS
-@@ -4979,6 +5021,7 @@ Usage: $0 [OPTION]... [TAG]...
+@@ -4979,6 +5024,7 @@ Usage: $0 [OPTION]... [TAG]...
  
    -h, --help       print this help, then exit
    -V, --version    print version number and configuration settings, then exit
@@ -1494,7 +1803,7 @@ changes mixed together.
    -q, --quiet, --silent
                     do not print progress messages
    -d, --debug      don't remove temporary files
-@@ -5001,12 +5044,13 @@ Report bugs to the package provider."
+@@ -5001,12 +5047,13 @@ Report bugs to the package provider."
  
  _ACEOF
  cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
@@ -1511,7 +1820,7 @@ changes mixed together.
  This config.status script is free software; the Free Software Foundation
  gives unlimited permission to copy, distribute and modify it."
  
-@@ -5024,11 +5068,16 @@ ac_need_defaults=:
+@@ -5024,11 +5071,16 @@ ac_need_defaults=:
  while test $# != 0
  do
    case $1 in
@@ -1529,7 +1838,7 @@ changes mixed together.
    *)
      ac_option=$1
      ac_optarg=$2
-@@ -5042,12 +5091,15 @@ do
+@@ -5042,12 +5094,15 @@ do
      ac_cs_recheck=: ;;
    --version | --versio | --versi | --vers | --ver | --ve | --v | -V )
      $as_echo "$ac_cs_version"; exit ;;
@@ -1545,7 +1854,7 @@ changes mixed together.
      esac
      as_fn_append CONFIG_FILES " '$ac_optarg'"
      ac_need_defaults=false;;
-@@ -5060,7 +5112,7 @@ do
+@@ -5060,7 +5115,7 @@ do
      ac_need_defaults=false;;
    --he | --h)
      # Conflict between --help and --header
@@ -1554,7 +1863,7 @@ changes mixed together.
  Try \`$0 --help' for more information.";;
    --help | --hel | -h )
      $as_echo "$ac_cs_usage"; exit ;;
-@@ -5069,7 +5121,7 @@ Try \`$0 --help' for more information.";
+@@ -5069,7 +5124,7 @@ Try \`$0 --help' for more information.";
      ac_cs_silent=: ;;
  
    # This is an error.
@@ -1563,7 +1872,7 @@ changes mixed together.
  Try \`$0 --help' for more information." ;;
  
    *) as_fn_append ac_config_targets " $1"
-@@ -5126,8 +5178,9 @@ do
+@@ -5126,8 +5181,9 @@ do
      "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
      "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
      "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
@@ -1574,7 +1883,7 @@ changes mixed together.
    esac
  done
  
-@@ -5165,7 +5218,7 @@ $debug ||
+@@ -5165,7 +5221,7 @@ $debug ||
  {
    tmp=./conf$$-$RANDOM
    (umask 077 && mkdir "$tmp")
@@ -1583,7 +1892,7 @@ changes mixed together.
  
  # Set up the scripts for CONFIG_FILES section.
  # No need to generate them if there are no CONFIG_FILES.
-@@ -5182,7 +5235,7 @@ if test "x$ac_cr" = x; then
+@@ -5182,7 +5238,7 @@ if test "x$ac_cr" = x; then
  fi
  ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
  if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
@@ -1592,7 +1901,7 @@ changes mixed together.
  else
    ac_cs_awk_cr=$ac_cr
  fi
-@@ -5196,18 +5249,18 @@ _ACEOF
+@@ -5196,18 +5252,18 @@ _ACEOF
    echo "$ac_subst_vars" | sed 's/.*/&!$&$ac_delim/' &&
    echo "_ACEOF"
  } >conf$$subs.sh ||
@@ -1615,7 +1924,7 @@ changes mixed together.
    else
      ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
    fi
-@@ -5229,7 +5282,7 @@ s/'"$ac_delim"'$//
+@@ -5229,7 +5285,7 @@ s/'"$ac_delim"'$//
  t delim
  :nl
  h
@@ -1624,7 +1933,7 @@ changes mixed together.
  t more1
  s/["\\]/\\&/g; s/^/"/; s/$/\\n"\\/
  p
-@@ -5243,7 +5296,7 @@ s/.\{148\}//
+@@ -5243,7 +5299,7 @@ s/.\{148\}//
  t nl
  :delim
  h
@@ -1633,7 +1942,7 @@ changes mixed together.
  t more2
  s/["\\]/\\&/g; s/^/"/; s/$/"/
  p
-@@ -5296,20 +5349,28 @@ if sed "s/$ac_cr//" < /dev/null > /dev/n
+@@ -5296,20 +5352,28 @@ if sed "s/$ac_cr//" < /dev/null > /dev/n
  else
    cat
  fi < "$tmp/subs1.awk" > "$tmp/subs.awk" \
@@ -1670,7 +1979,7 @@ changes mixed together.
  s/^[^=]*=[	 ]*$//
  }'
  fi
-@@ -5337,7 +5398,7 @@ for ac_last_try in false false :; do
+@@ -5337,7 +5401,7 @@ for ac_last_try in false false :; do
    if test -z "$ac_t"; then
      break
    elif $ac_last_try; then
@@ -1679,7 +1988,7 @@ changes mixed together.
    else
      ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
    fi
-@@ -5422,7 +5483,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_writ
+@@ -5422,7 +5486,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_writ
  _ACAWK
  _ACEOF
  cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
@@ -1688,7 +1997,7 @@ changes mixed together.
  fi # test -n "$CONFIG_HEADERS"
  
  
-@@ -5435,7 +5496,7 @@ do
+@@ -5435,7 +5499,7 @@ do
    esac
    case $ac_mode$ac_tag in
    :[FHL]*:*);;
@@ -1697,7 +2006,7 @@ changes mixed together.
    :[FH]-) ac_tag=-:-;;
    :[FH]*) ac_tag=$ac_tag:$ac_tag.in;;
    esac
-@@ -5463,7 +5524,7 @@ do
+@@ -5463,7 +5527,7 @@ do
  	   [\\/$]*) false;;
  	   *) test -f "$srcdir/$ac_f" && ac_f="$srcdir/$ac_f";;
  	   esac ||
@@ -1706,7 +2015,7 @@ changes mixed together.
        esac
        case $ac_f in *\'*) ac_f=`$as_echo "$ac_f" | sed "s/'/'\\\\\\\\''/g"`;; esac
        as_fn_append ac_file_inputs " '$ac_f'"
-@@ -5490,7 +5551,7 @@ $as_echo "$as_me: creating $ac_file" >&6
+@@ -5490,7 +5554,7 @@ $as_echo "$as_me: creating $ac_file" >&6
  
      case $ac_tag in
      *:-:* | *:-) cat >"$tmp/stdin" \
@@ -1715,7 +2024,7 @@ changes mixed together.
      esac
      ;;
    esac
-@@ -5627,22 +5688,22 @@ s&@MKDIR_P@&$ac_MKDIR_P&;t t
+@@ -5627,22 +5691,22 @@ s&@MKDIR_P@&$ac_MKDIR_P&;t t
  $ac_datarootdir_hack
  "
  eval sed \"\$ac_sed_extra\" "$ac_file_inputs" | $AWK -f "$tmp/subs.awk" >$tmp/out \
@@ -1742,7 +2051,7 @@ changes mixed together.
   ;;
    :H)
    #
-@@ -5653,19 +5714,19 @@ which seems to be undefined.  Please mak
+@@ -5653,19 +5717,19 @@ which seems to be undefined.  Please mak
        $as_echo "/* $configure_input  */" \
        && eval '$AWK -f "$tmp/defines.awk"' "$ac_file_inputs"
      } >"$tmp/config.h" \
@@ -1765,7 +2074,7 @@ changes mixed together.
    fi
  # Compute "$ac_file"'s index in $config_headers.
  _am_arg="$ac_file"
-@@ -5815,7 +5876,7 @@ _ACEOF
+@@ -5815,7 +5879,7 @@ _ACEOF
  ac_clean_files=$ac_clean_files_save
  
  test $ac_write_fail = 0 ||
@@ -1774,7 +2083,7 @@ changes mixed together.
  
  
  # configure is writing to config.log, and then calls config.status.
-@@ -5836,7 +5897,7 @@ if test "$no_create" != yes; then
+@@ -5836,7 +5900,7 @@ if test "$no_create" != yes; then
    exec 5>>config.log
    # Use ||, not &&, to avoid exiting from the if with $? = 1, which
    # would make configure fail if this is the last instruction.

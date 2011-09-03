@@ -4,7 +4,7 @@ Architecture: i386
 Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
 Installed-Size: 68
 Depends: libc6 (>= 2.1), libncurses5 (>= 5.7+20100313), libusb-0.1-4 (>= 2:0.1.12)
-Recommends: sdr-shell
+Recommends: sdr-shell (>= 4.0)
 Section: hamradio
 Priority: extra
 Homepage: http://code.google.com/p/usbsoftrock/
