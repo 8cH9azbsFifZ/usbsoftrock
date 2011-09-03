@@ -1,0 +1,5186 @@
+This patch contains all the Debian-specific
+changes mixed together.
+--- usbsoftrock-1.0.2~svn5.orig/configure.ac
++++ usbsoftrock-1.0.2~svn5/configure.ac
+@@ -1,10 +1,7 @@
+-#                                               -*- Autoconf -*-
+-# Process this file with autoconf to produce a configure script.
+-
+ AC_PREREQ([2.63])
+ AC_INIT(usbsoftrock.c)
+ AM_INIT_AUTOMAKE(usbsoftrock,1.0.2)
+-AC_CONFIG_SRCDIR([usbsoftrock.c])
++AC_CONFIG_SRCDIR([src/usbsoftrock.c])
+ AC_CONFIG_HEADERS([config.h])
+ 
+ # Checks for programs.
+@@ -35,5 +32,5 @@ AC_CHECK_HEADERS([stdlib.h string.h unis
+ 
+ # Checks for library functions.
+ 
+-AC_CONFIG_FILES([Makefile])
++AC_CONFIG_FILES([Makefile src/Makefile])
+ AC_OUTPUT
+--- usbsoftrock-1.0.2~svn5.orig/install-sh
++++ usbsoftrock-1.0.2~svn5/install-sh
+@@ -1,7 +1,7 @@
+ #!/bin/sh
+ # install - install a program, script, or datafile
+ 
+-scriptversion=2006-12-25.00
++scriptversion=2009-04-28.21; # UTC
+ 
+ # This originates from X11R5 (mit/util/scripts/install.sh), which was
+ # later released in X11R6 (xc/config/util/install.sh) with the
+@@ -515,5 +515,6 @@ done
+ # eval: (add-hook 'write-file-hooks 'time-stamp)
+ # time-stamp-start: "scriptversion="
+ # time-stamp-format: "%:y-%02m-%02d.%02H"
+-# time-stamp-end: "$"
++# time-stamp-time-zone: "UTC"
++# time-stamp-end: "; # UTC"
+ # End:
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/autogen.sh
+@@ -0,0 +1,5 @@
++#!/bin/sh
++aclocal
++automake --add-missing
++autoconf
++./configure
+--- usbsoftrock-1.0.2~svn5.orig/Makefile.am
++++ usbsoftrock-1.0.2~svn5/Makefile.am
+@@ -1,8 +1 @@
+-bin_PROGRAMS = usbsoftrock
+-usbsoftrock_SOURCES = usbsoftrock.c operations.c operations.h config_ops.c config_ops.h \
+-	interactive.c interactive.h
+-usbsoftrock_LDADD = -lm
+-
+-INCLUDES = $(libusb_CFLAGS)
+-#LIBS = $(libusb_LIBS) 
+-
++SUBDIRS = src
+--- usbsoftrock-1.0.2~svn5.orig/aclocal.m4
++++ usbsoftrock-1.0.2~svn5/aclocal.m4
+@@ -1,4 +1,4 @@
+-# generated automatically by aclocal 1.11 -*- Autoconf -*-
++# generated automatically by aclocal 1.11.1 -*- Autoconf -*-
+ 
+ # Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+ # 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+@@ -13,13 +13,14 @@
+ 
+ m4_ifndef([AC_AUTOCONF_VERSION],
+   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
+-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.64],,
+-[m4_warning([this file was generated for autoconf 2.64.
++m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.67],,
++[m4_warning([this file was generated for autoconf 2.67.
+ You have another version of autoconf.  It may work, but is not guaranteed to.
+ If you have problems, you may need to regenerate the build system entirely.
+ To do so, use the procedure documented by the package, typically `autoreconf'.])])
+ 
+ # pkg.m4 - Macros to locate and utilise pkg-config.            -*- Autoconf -*-
++# serial 1 (pkg-config-0.24)
+ # 
+ # Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
+ #
+@@ -47,7 +48,10 @@ To do so, use the procedure documented b
+ AC_DEFUN([PKG_PROG_PKG_CONFIG],
+ [m4_pattern_forbid([^_?PKG_[A-Z_]+$])
+ m4_pattern_allow([^PKG_CONFIG(_PATH)?$])
+-AC_ARG_VAR([PKG_CONFIG], [path to pkg-config utility])dnl
++AC_ARG_VAR([PKG_CONFIG], [path to pkg-config utility])
++AC_ARG_VAR([PKG_CONFIG_PATH], [directories to add to pkg-config's search path])
++AC_ARG_VAR([PKG_CONFIG_LIBDIR], [path overriding pkg-config's built-in search path])
++
+ if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+ 	AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
+ fi
+@@ -60,7 +64,6 @@ if test -n "$PKG_CONFIG"; then
+ 		AC_MSG_RESULT([no])
+ 		PKG_CONFIG=""
+ 	fi
+-		
+ fi[]dnl
+ ])# PKG_PROG_PKG_CONFIG
+ 
+@@ -69,34 +72,31 @@ fi[]dnl
+ # Check to see whether a particular set of modules exists.  Similar
+ # to PKG_CHECK_MODULES(), but does not set variables or print errors.
+ #
+-#
+-# Similar to PKG_CHECK_MODULES, make sure that the first instance of
+-# this or PKG_CHECK_MODULES is called, or make sure to call
+-# PKG_CHECK_EXISTS manually
++# Please remember that m4 expands AC_REQUIRE([PKG_PROG_PKG_CONFIG])
++# only at the first occurence in configure.ac, so if the first place
++# it's called might be skipped (such as if it is within an "if", you
++# have to call PKG_CHECK_EXISTS manually
+ # --------------------------------------------------------------
+ AC_DEFUN([PKG_CHECK_EXISTS],
+ [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
+ if test -n "$PKG_CONFIG" && \
+     AC_RUN_LOG([$PKG_CONFIG --exists --print-errors "$1"]); then
+-  m4_ifval([$2], [$2], [:])
++  m4_default([$2], [:])
+ m4_ifvaln([$3], [else
+   $3])dnl
+ fi])
+ 
+-
+ # _PKG_CONFIG([VARIABLE], [COMMAND], [MODULES])
+ # ---------------------------------------------
+ m4_define([_PKG_CONFIG],
+-[if test -n "$PKG_CONFIG"; then
+-    if test -n "$$1"; then
+-        pkg_cv_[]$1="$$1"
+-    else
+-        PKG_CHECK_EXISTS([$3],
+-                         [pkg_cv_[]$1=`$PKG_CONFIG --[]$2 "$3" 2>/dev/null`],
+-			 [pkg_failed=yes])
+-    fi
+-else
+-	pkg_failed=untried
++[if test -n "$$1"; then
++    pkg_cv_[]$1="$$1"
++ elif test -n "$PKG_CONFIG"; then
++    PKG_CHECK_EXISTS([$3],
++                     [pkg_cv_[]$1=`$PKG_CONFIG --[]$2 "$3" 2>/dev/null`],
++		     [pkg_failed=yes])
++ else
++    pkg_failed=untried
+ fi[]dnl
+ ])# _PKG_CONFIG
+ 
+@@ -138,16 +138,17 @@ and $1[]_LIBS to avoid the need to call
+ See the pkg-config man page for more details.])
+ 
+ if test $pkg_failed = yes; then
++   	AC_MSG_RESULT([no])
+         _PKG_SHORT_ERRORS_SUPPORTED
+         if test $_pkg_short_errors_supported = yes; then
+-	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "$2"`
++	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "$2" 2>&1`
+         else 
+-	        $1[]_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "$2"`
++	        $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors "$2" 2>&1`
+         fi
+ 	# Put the nasty error message in config.log where it belongs
+ 	echo "$$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
+ 
+-	ifelse([$4], , [AC_MSG_ERROR(dnl
++	m4_default([$4], [AC_MSG_ERROR(
+ [Package requirements ($2) were not met:
+ 
+ $$1_PKG_ERRORS
+@@ -155,25 +156,24 @@ $$1_PKG_ERRORS
+ Consider adjusting the PKG_CONFIG_PATH environment variable if you
+ installed software in a non-standard prefix.
+ 
+-_PKG_TEXT
+-])],
+-		[AC_MSG_RESULT([no])
+-                $4])
++_PKG_TEXT])[]dnl
++        ])
+ elif test $pkg_failed = untried; then
+-	ifelse([$4], , [AC_MSG_FAILURE(dnl
++     	AC_MSG_RESULT([no])
++	m4_default([$4], [AC_MSG_FAILURE(
+ [The pkg-config script could not be found or is too old.  Make sure it
+ is in your PATH or set the PKG_CONFIG environment variable to the full
+ path to pkg-config.
+ 
+ _PKG_TEXT
+ 
+-To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
+-		[$4])
++To get pkg-config, see <http://pkg-config.freedesktop.org/>.])[]dnl
++        ])
+ else
+ 	$1[]_CFLAGS=$pkg_cv_[]$1[]_CFLAGS
+ 	$1[]_LIBS=$pkg_cv_[]$1[]_LIBS
+         AC_MSG_RESULT([yes])
+-	ifelse([$3], , :, [$3])
++	$3
+ fi[]dnl
+ ])# PKG_CHECK_MODULES
+ 
+@@ -192,7 +192,7 @@ AC_DEFUN([AM_AUTOMAKE_VERSION],
+ [am__api_version='1.11'
+ dnl Some users find AM_AUTOMAKE_VERSION and mistake it for a way to
+ dnl require some minimum version.  Point them to the right macro.
+-m4_if([$1], [1.11], [],
++m4_if([$1], [1.11.1], [],
+       [AC_FATAL([Do not call $0, use AM_INIT_AUTOMAKE([$1]).])])dnl
+ ])
+ 
+@@ -208,7 +208,7 @@ m4_define([_AM_AUTOCONF_VERSION], [])
+ # Call AM_AUTOMAKE_VERSION and AM_AUTOMAKE_VERSION so they can be traced.
+ # This function is AC_REQUIREd by AM_INIT_AUTOMAKE.
+ AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
+-[AM_AUTOMAKE_VERSION([1.11])dnl
++[AM_AUTOMAKE_VERSION([1.11.1])dnl
+ m4_ifndef([AC_AUTOCONF_VERSION],
+   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
+ _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
+--- usbsoftrock-1.0.2~svn5.orig/depcomp
++++ usbsoftrock-1.0.2~svn5/depcomp
+@@ -1,10 +1,10 @@
+ #! /bin/sh
+ # depcomp - compile a program generating dependencies as side-effects
+ 
+-scriptversion=2007-03-29.01
++scriptversion=2009-04-28.21; # UTC
+ 
+-# Copyright (C) 1999, 2000, 2003, 2004, 2005, 2006, 2007 Free Software
+-# Foundation, Inc.
++# Copyright (C) 1999, 2000, 2003, 2004, 2005, 2006, 2007, 2009 Free
++# Software Foundation, Inc.
+ 
+ # This program is free software; you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -17,9 +17,7 @@ scriptversion=2007-03-29.01
+ # GNU General Public License for more details.
+ 
+ # You should have received a copy of the GNU General Public License
+-# along with this program; if not, write to the Free Software
+-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+-# 02110-1301, USA.
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ # As a special exception to the GNU General Public License, if you
+ # distribute this file as part of a program that contains a
+@@ -87,6 +85,15 @@ if test "$depmode" = dashXmstdout; then
+    depmode=dashmstdout
+ fi
+ 
++cygpath_u="cygpath -u -f -"
++if test "$depmode" = msvcmsys; then
++   # This is just like msvisualcpp but w/o cygpath translation.
++   # Just convert the backslash-escaped backslashes to single forward
++   # slashes to satisfy depend.m4
++   cygpath_u="sed s,\\\\\\\\,/,g"
++   depmode=msvisualcpp
++fi
++
+ case "$depmode" in
+ gcc3)
+ ## gcc 3 implements dependency tracking that does exactly what
+@@ -192,14 +199,14 @@ sgi)
+ ' < "$tmpdepfile" \
+     | sed -e 's/^.*\.o://' -e 's/#.*$//' -e '/^$/ d' | \
+     tr '
+-' ' ' >> $depfile
+-    echo >> $depfile
++' ' ' >> "$depfile"
++    echo >> "$depfile"
+ 
+     # The second pass generates a dummy entry for each header file.
+     tr ' ' '
+ ' < "$tmpdepfile" \
+    | sed -e 's/^.*\.o://' -e 's/#.*$//' -e '/^$/ d' -e 's/$/:/' \
+-   >> $depfile
++   >> "$depfile"
+   else
+     # The sourcefile does not contain any dependencies, so just
+     # store a dummy comment line, to avoid errors with the Makefile
+@@ -328,7 +335,12 @@ hp2)
+   if test -f "$tmpdepfile"; then
+     sed -e "s,^.*\.[a-z]*:,$object:," "$tmpdepfile" > "$depfile"
+     # Add `dependent.h:' lines.
+-    sed -ne '2,${; s/^ *//; s/ \\*$//; s/$/:/; p;}' "$tmpdepfile" >> "$depfile"
++    sed -ne '2,${
++	       s/^ *//
++	       s/ \\*$//
++	       s/$/:/
++	       p
++	     }' "$tmpdepfile" >> "$depfile"
+   else
+     echo "#dummy" > "$depfile"
+   fi
+@@ -404,7 +416,7 @@ dashmstdout)
+ 
+   # Remove the call to Libtool.
+   if test "$libtool" = yes; then
+-    while test $1 != '--mode=compile'; do
++    while test "X$1" != 'X--mode=compile'; do
+       shift
+     done
+     shift
+@@ -455,32 +467,39 @@ makedepend)
+   "$@" || exit $?
+   # Remove any Libtool call
+   if test "$libtool" = yes; then
+-    while test $1 != '--mode=compile'; do
++    while test "X$1" != 'X--mode=compile'; do
+       shift
+     done
+     shift
+   fi
+   # X makedepend
+   shift
+-  cleared=no
+-  for arg in "$@"; do
++  cleared=no eat=no
++  for arg
++  do
+     case $cleared in
+     no)
+       set ""; shift
+       cleared=yes ;;
+     esac
++    if test $eat = yes; then
++      eat=no
++      continue
++    fi
+     case "$arg" in
+     -D*|-I*)
+       set fnord "$@" "$arg"; shift ;;
+     # Strip any option that makedepend may not understand.  Remove
+     # the object too, otherwise makedepend will parse it as a source file.
++    -arch)
++      eat=yes ;;
+     -*|$object)
+       ;;
+     *)
+       set fnord "$@" "$arg"; shift ;;
+     esac
+   done
+-  obj_suffix="`echo $object | sed 's/^.*\././'`"
++  obj_suffix=`echo "$object" | sed 's/^.*\././'`
+   touch "$tmpdepfile"
+   ${MAKEDEPEND-makedepend} -o"$obj_suffix" -f"$tmpdepfile" "$@"
+   rm -f "$depfile"
+@@ -500,7 +519,7 @@ cpp)
+ 
+   # Remove the call to Libtool.
+   if test "$libtool" = yes; then
+-    while test $1 != '--mode=compile'; do
++    while test "X$1" != 'X--mode=compile'; do
+       shift
+     done
+     shift
+@@ -538,13 +557,27 @@ cpp)
+ 
+ msvisualcpp)
+   # Important note: in order to support this mode, a compiler *must*
+-  # always write the preprocessed file to stdout, regardless of -o,
+-  # because we must use -o when running libtool.
++  # always write the preprocessed file to stdout.
+   "$@" || exit $?
++
++  # Remove the call to Libtool.
++  if test "$libtool" = yes; then
++    while test "X$1" != 'X--mode=compile'; do
++      shift
++    done
++    shift
++  fi
++
+   IFS=" "
+   for arg
+   do
+     case "$arg" in
++    -o)
++      shift
++      ;;
++    $object)
++      shift
++      ;;
+     "-Gm"|"/Gm"|"-Gi"|"/Gi"|"-ZI"|"/ZI")
+ 	set fnord "$@"
+ 	shift
+@@ -557,16 +590,23 @@ msvisualcpp)
+ 	;;
+     esac
+   done
+-  "$@" -E |
+-  sed -n '/^#line [0-9][0-9]* "\([^"]*\)"/ s::echo "`cygpath -u \\"\1\\"`":p' | sort | uniq > "$tmpdepfile"
++  "$@" -E 2>/dev/null |
++  sed -n '/^#line [0-9][0-9]* "\([^"]*\)"/ s::\1:p' | $cygpath_u | sort -u > "$tmpdepfile"
+   rm -f "$depfile"
+   echo "$object : \\" > "$depfile"
+-  . "$tmpdepfile" | sed 's% %\\ %g' | sed -n '/^\(.*\)$/ s::	\1 \\:p' >> "$depfile"
++  sed < "$tmpdepfile" -n -e 's% %\\ %g' -e '/^\(.*\)$/ s::	\1 \\:p' >> "$depfile"
+   echo "	" >> "$depfile"
+-  . "$tmpdepfile" | sed 's% %\\ %g' | sed -n '/^\(.*\)$/ s::\1\::p' >> "$depfile"
++  sed < "$tmpdepfile" -n -e 's% %\\ %g' -e '/^\(.*\)$/ s::\1\::p' >> "$depfile"
+   rm -f "$tmpdepfile"
+   ;;
+ 
++msvcmsys)
++  # This case exists only to let depend.m4 do its work.  It works by
++  # looking at the text of this script.  This case will never be run,
++  # since it is checked for above.
++  exit 1
++  ;;
++
+ none)
+   exec "$@"
+   ;;
+@@ -585,5 +625,6 @@ exit 0
+ # eval: (add-hook 'write-file-hooks 'time-stamp)
+ # time-stamp-start: "scriptversion="
+ # time-stamp-format: "%:y-%02m-%02d.%02H"
+-# time-stamp-end: "$"
++# time-stamp-time-zone: "UTC"
++# time-stamp-end: "; # UTC"
+ # End:
+--- usbsoftrock-1.0.2~svn5.orig/configure
++++ usbsoftrock-1.0.2~svn5/configure
+@@ -1,11 +1,13 @@
+ #! /bin/sh
+ # Guess values for system-dependent variables and create Makefiles.
+-# Generated by GNU Autoconf 2.64.
++# Generated by GNU Autoconf 2.67.
++#
+ #
+ # Copyright (C) 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
+-# 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software
++# 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software
+ # Foundation, Inc.
+ #
++#
+ # This configure script is free software; the Free Software Foundation
+ # gives unlimited permission to copy, distribute and modify it.
+ ## -------------------- ##
+@@ -314,7 +316,7 @@ $as_echo X"$as_dir" |
+       test -d "$as_dir" && break
+     done
+     test -z "$as_dirs" || eval "mkdir $as_dirs"
+-  } || test -d "$as_dir" || as_fn_error "cannot create directory $as_dir"
++  } || test -d "$as_dir" || as_fn_error $? "cannot create directory $as_dir"
+ 
+ 
+ } # as_fn_mkdir_p
+@@ -354,19 +356,19 @@ else
+ fi # as_fn_arith
+ 
+ 
+-# as_fn_error ERROR [LINENO LOG_FD]
+-# ---------------------------------
++# as_fn_error STATUS ERROR [LINENO LOG_FD]
++# ----------------------------------------
+ # Output "`basename $0`: error: ERROR" to stderr. If LINENO and LOG_FD are
+ # provided, also output the error to LOG_FD, referencing LINENO. Then exit the
+-# script with status $?, using 1 if that was 0.
++# script with STATUS, using 1 if that was 0.
+ as_fn_error ()
+ {
+-  as_status=$?; test $as_status -eq 0 && as_status=1
+-  if test "$3"; then
+-    as_lineno=${as_lineno-"$2"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+-    $as_echo "$as_me:${as_lineno-$LINENO}: error: $1" >&$3
++  as_status=$1; test $as_status -eq 0 && as_status=1
++  if test "$4"; then
++    as_lineno=${as_lineno-"$3"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
++    $as_echo "$as_me:${as_lineno-$LINENO}: error: $2" >&$4
+   fi
+-  $as_echo "$as_me: error: $1" >&2
++  $as_echo "$as_me: error: $2" >&2
+   as_fn_exit $as_status
+ } # as_fn_error
+ 
+@@ -524,10 +526,11 @@ as_tr_cpp="eval sed 'y%*$as_cr_letters%P
+ as_tr_sh="eval sed 'y%*+%pp%;s%[^_$as_cr_alnum]%_%g'"
+ 
+ 
+-exec 7<&0 </dev/null 6>&1
++test -n "$DJDIR" || exec 7<&0 </dev/null
++exec 6>&1
+ 
+ # Name of the host.
+-# hostname on some systems (SVR3.2, Linux) returns a bogus exit status,
++# hostname on some systems (SVR3.2, old GNU/Linux) returns a bogus exit status,
+ # so uname gets run too.
+ ac_hostname=`(hostname || uname -n) 2>/dev/null | sed 1q`
+ 
+@@ -552,7 +555,7 @@ PACKAGE_BUGREPORT=
+ PACKAGE_URL=
+ 
+ ac_unique_file="usbsoftrock.c"
+-ac_unique_file="usbsoftrock.c"
++ac_unique_file="src/usbsoftrock.c"
+ # Factoring default headers for most tests.
+ ac_includes_default="\
+ #include <stdio.h>
+@@ -598,6 +601,8 @@ GREP
+ CPP
+ libusb_LIBS
+ libusb_CFLAGS
++PKG_CONFIG_LIBDIR
++PKG_CONFIG_PATH
+ PKG_CONFIG
+ am__fastdepCC_FALSE
+ am__fastdepCC_TRUE
+@@ -690,6 +695,8 @@ LDFLAGS
+ LIBS
+ CPPFLAGS
+ PKG_CONFIG
++PKG_CONFIG_PATH
++PKG_CONFIG_LIBDIR
+ libusb_CFLAGS
+ libusb_LIBS
+ CPP'
+@@ -755,8 +762,9 @@ do
+   fi
+ 
+   case $ac_option in
+-  *=*)	ac_optarg=`expr "X$ac_option" : '[^=]*=\(.*\)'` ;;
+-  *)	ac_optarg=yes ;;
++  *=?*) ac_optarg=`expr "X$ac_option" : '[^=]*=\(.*\)'` ;;
++  *=)   ac_optarg= ;;
++  *)    ac_optarg=yes ;;
+   esac
+ 
+   # Accept the important Cygnus configure options, so we can diagnose typos.
+@@ -801,7 +809,7 @@ do
+     ac_useropt=`expr "x$ac_option" : 'x-*disable-\(.*\)'`
+     # Reject names that are not valid shell variable names.
+     expr "x$ac_useropt" : ".*[^-+._$as_cr_alnum]" >/dev/null &&
+-      as_fn_error "invalid feature name: $ac_useropt"
++      as_fn_error $? "invalid feature name: $ac_useropt"
+     ac_useropt_orig=$ac_useropt
+     ac_useropt=`$as_echo "$ac_useropt" | sed 's/[-+.]/_/g'`
+     case $ac_user_opts in
+@@ -827,7 +835,7 @@ do
+     ac_useropt=`expr "x$ac_option" : 'x-*enable-\([^=]*\)'`
+     # Reject names that are not valid shell variable names.
+     expr "x$ac_useropt" : ".*[^-+._$as_cr_alnum]" >/dev/null &&
+-      as_fn_error "invalid feature name: $ac_useropt"
++      as_fn_error $? "invalid feature name: $ac_useropt"
+     ac_useropt_orig=$ac_useropt
+     ac_useropt=`$as_echo "$ac_useropt" | sed 's/[-+.]/_/g'`
+     case $ac_user_opts in
+@@ -1031,7 +1039,7 @@ do
+     ac_useropt=`expr "x$ac_option" : 'x-*with-\([^=]*\)'`
+     # Reject names that are not valid shell variable names.
+     expr "x$ac_useropt" : ".*[^-+._$as_cr_alnum]" >/dev/null &&
+-      as_fn_error "invalid package name: $ac_useropt"
++      as_fn_error $? "invalid package name: $ac_useropt"
+     ac_useropt_orig=$ac_useropt
+     ac_useropt=`$as_echo "$ac_useropt" | sed 's/[-+.]/_/g'`
+     case $ac_user_opts in
+@@ -1047,7 +1055,7 @@ do
+     ac_useropt=`expr "x$ac_option" : 'x-*without-\(.*\)'`
+     # Reject names that are not valid shell variable names.
+     expr "x$ac_useropt" : ".*[^-+._$as_cr_alnum]" >/dev/null &&
+-      as_fn_error "invalid package name: $ac_useropt"
++      as_fn_error $? "invalid package name: $ac_useropt"
+     ac_useropt_orig=$ac_useropt
+     ac_useropt=`$as_echo "$ac_useropt" | sed 's/[-+.]/_/g'`
+     case $ac_user_opts in
+@@ -1077,8 +1085,8 @@ do
+   | --x-librar=* | --x-libra=* | --x-libr=* | --x-lib=* | --x-li=* | --x-l=*)
+     x_libraries=$ac_optarg ;;
+ 
+-  -*) as_fn_error "unrecognized option: \`$ac_option'
+-Try \`$0 --help' for more information."
++  -*) as_fn_error $? "unrecognized option: \`$ac_option'
++Try \`$0 --help' for more information"
+     ;;
+ 
+   *=*)
+@@ -1086,7 +1094,7 @@ Try \`$0 --help' for more information."
+     # Reject names that are not valid shell variable names.
+     case $ac_envvar in #(
+       '' | [0-9]* | *[!_$as_cr_alnum]* )
+-      as_fn_error "invalid variable name: \`$ac_envvar'" ;;
++      as_fn_error $? "invalid variable name: \`$ac_envvar'" ;;
+     esac
+     eval $ac_envvar=\$ac_optarg
+     export $ac_envvar ;;
+@@ -1104,13 +1112,13 @@ done
+ 
+ if test -n "$ac_prev"; then
+   ac_option=--`echo $ac_prev | sed 's/_/-/g'`
+-  as_fn_error "missing argument to $ac_option"
++  as_fn_error $? "missing argument to $ac_option"
+ fi
+ 
+ if test -n "$ac_unrecognized_opts"; then
+   case $enable_option_checking in
+     no) ;;
+-    fatal) as_fn_error "unrecognized options: $ac_unrecognized_opts" ;;
++    fatal) as_fn_error $? "unrecognized options: $ac_unrecognized_opts" ;;
+     *)     $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2 ;;
+   esac
+ fi
+@@ -1133,7 +1141,7 @@ do
+     [\\/$]* | ?:[\\/]* )  continue;;
+     NONE | '' ) case $ac_var in *prefix ) continue;; esac;;
+   esac
+-  as_fn_error "expected an absolute directory name for --$ac_var: $ac_val"
++  as_fn_error $? "expected an absolute directory name for --$ac_var: $ac_val"
+ done
+ 
+ # There might be people who depend on the old broken behavior: `$host'
+@@ -1147,8 +1155,8 @@ target=$target_alias
+ if test "x$host_alias" != x; then
+   if test "x$build_alias" = x; then
+     cross_compiling=maybe
+-    $as_echo "$as_me: WARNING: If you wanted to set the --build type, don't use --host.
+-    If a cross compiler is detected then cross compile mode will be used." >&2
++    $as_echo "$as_me: WARNING: if you wanted to set the --build type, don't use --host.
++    If a cross compiler is detected then cross compile mode will be used" >&2
+   elif test "x$build_alias" != "x$host_alias"; then
+     cross_compiling=yes
+   fi
+@@ -1163,9 +1171,9 @@ test "$silent" = yes && exec 6>/dev/null
+ ac_pwd=`pwd` && test -n "$ac_pwd" &&
+ ac_ls_di=`ls -di .` &&
+ ac_pwd_ls_di=`cd "$ac_pwd" && ls -di .` ||
+-  as_fn_error "working directory cannot be determined"
++  as_fn_error $? "working directory cannot be determined"
+ test "X$ac_ls_di" = "X$ac_pwd_ls_di" ||
+-  as_fn_error "pwd does not report name of working directory"
++  as_fn_error $? "pwd does not report name of working directory"
+ 
+ 
+ # Find the source files, if location was not specified.
+@@ -1204,11 +1212,11 @@ else
+ fi
+ if test ! -r "$srcdir/$ac_unique_file"; then
+   test "$ac_srcdir_defaulted" = yes && srcdir="$ac_confdir or .."
+-  as_fn_error "cannot find sources ($ac_unique_file) in $srcdir"
++  as_fn_error $? "cannot find sources ($ac_unique_file) in $srcdir"
+ fi
+ ac_msg="sources are in $srcdir, but \`cd $srcdir' does not work"
+ ac_abs_confdir=`(
+-	cd "$srcdir" && test -r "./$ac_unique_file" || as_fn_error "$ac_msg"
++	cd "$srcdir" && test -r "./$ac_unique_file" || as_fn_error $? "$ac_msg"
+ 	pwd)`
+ # When building in place, set srcdir=.
+ if test "$ac_abs_confdir" = "$ac_pwd"; then
+@@ -1248,7 +1256,7 @@ Configuration:
+       --help=short        display options specific to this package
+       --help=recursive    display the short help of all the included packages
+   -V, --version           display version information and exit
+-  -q, --quiet, --silent   do not print \`checking...' messages
++  -q, --quiet, --silent   do not print \`checking ...' messages
+       --cache-file=FILE   cache test results in FILE [disabled]
+   -C, --config-cache      alias for \`--cache-file=config.cache'
+   -n, --no-create         do not create output files
+@@ -1315,9 +1323,13 @@ Some influential environment variables:
+   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+               nonstandard directory <lib dir>
+   LIBS        libraries to pass to the linker, e.g. -l<library>
+-  CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
++  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+               you have headers in a nonstandard directory <include dir>
+   PKG_CONFIG  path to pkg-config utility
++  PKG_CONFIG_PATH
++              directories to add to pkg-config's search path
++  PKG_CONFIG_LIBDIR
++              path overriding pkg-config's built-in search path
+   libusb_CFLAGS
+               C compiler flags for libusb, overriding pkg-config
+   libusb_LIBS linker flags for libusb, overriding pkg-config
+@@ -1390,9 +1402,9 @@ test -n "$ac_init_help" && exit $ac_stat
+ if $ac_init_version; then
+   cat <<\_ACEOF
+ configure
+-generated by GNU Autoconf 2.64
++generated by GNU Autoconf 2.67
+ 
+-Copyright (C) 2009 Free Software Foundation, Inc.
++Copyright (C) 2010 Free Software Foundation, Inc.
+ This configure script is free software; the Free Software Foundation
+ gives unlimited permission to copy, distribute and modify it.
+ _ACEOF
+@@ -1437,7 +1449,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
+ 	ac_retval=1
+ fi
+   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+-  return $ac_retval
++  as_fn_set_status $ac_retval
+ 
+ } # ac_fn_c_try_compile
+ 
+@@ -1483,7 +1495,7 @@ fi
+   # left behind by Apple's compiler.  We do this before executing the actions.
+   rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+-  return $ac_retval
++  as_fn_set_status $ac_retval
+ 
+ } # ac_fn_c_try_link
+ 
+@@ -1508,7 +1520,7 @@ $as_echo "$ac_try_echo"; } >&5
+     mv -f conftest.er1 conftest.err
+   fi
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+-  test $ac_status = 0; } >/dev/null && {
++  test $ac_status = 0; } > conftest.i && {
+ 	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+ 	 test ! -s conftest.err
+        }; then :
+@@ -1520,7 +1532,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
+     ac_retval=1
+ fi
+   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+-  return $ac_retval
++  as_fn_set_status $ac_retval
+ 
+ } # ac_fn_c_try_cpp
+ 
+@@ -1532,10 +1544,10 @@ fi
+ ac_fn_c_check_header_mongrel ()
+ {
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+-  if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
++  if eval "test \"\${$3+set}\"" = set; then :
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+ $as_echo_n "checking for $2... " >&6; }
+-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
++if eval "test \"\${$3+set}\"" = set; then :
+   $as_echo_n "(cached) " >&6
+ fi
+ eval ac_res=\$$3
+@@ -1571,7 +1583,7 @@ if ac_fn_c_try_cpp "$LINENO"; then :
+ else
+   ac_header_preproc=no
+ fi
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.err conftest.i conftest.$ac_ext
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
+ $as_echo "$ac_header_preproc" >&6; }
+ 
+@@ -1598,7 +1610,7 @@ $as_echo "$as_me: WARNING: $2: proceedin
+ esac
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+ $as_echo_n "checking for $2... " >&6; }
+-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
++if eval "test \"\${$3+set}\"" = set; then :
+   $as_echo_n "(cached) " >&6
+ else
+   eval "$3=\$ac_header_compiler"
+@@ -1649,7 +1661,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
+ fi
+   rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+-  return $ac_retval
++  as_fn_set_status $ac_retval
+ 
+ } # ac_fn_c_try_run
+ 
+@@ -1662,7 +1674,7 @@ ac_fn_c_check_header_compile ()
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+ $as_echo_n "checking for $2... " >&6; }
+-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
++if eval "test \"\${$3+set}\"" = set; then :
+   $as_echo_n "(cached) " >&6
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+@@ -1688,7 +1700,7 @@ This file contains any messages produced
+ running configure, to aid debugging if configure makes a mistake.
+ 
+ It was created by $as_me, which was
+-generated by GNU Autoconf 2.64.  Invocation command line was
++generated by GNU Autoconf 2.67.  Invocation command line was
+ 
+   $ $0 $@
+ 
+@@ -1798,11 +1810,9 @@ trap 'exit_status=$?
+   {
+     echo
+ 
+-    cat <<\_ASBOX
+-## ---------------- ##
++    $as_echo "## ---------------- ##
+ ## Cache variables. ##
+-## ---------------- ##
+-_ASBOX
++## ---------------- ##"
+     echo
+     # The following way of writing the cache mishandles newlines in values,
+ (
+@@ -1836,11 +1846,9 @@ $as_echo "$as_me: WARNING: cache variabl
+ )
+     echo
+ 
+-    cat <<\_ASBOX
+-## ----------------- ##
++    $as_echo "## ----------------- ##
+ ## Output variables. ##
+-## ----------------- ##
+-_ASBOX
++## ----------------- ##"
+     echo
+     for ac_var in $ac_subst_vars
+     do
+@@ -1853,11 +1861,9 @@ _ASBOX
+     echo
+ 
+     if test -n "$ac_subst_files"; then
+-      cat <<\_ASBOX
+-## ------------------- ##
++      $as_echo "## ------------------- ##
+ ## File substitutions. ##
+-## ------------------- ##
+-_ASBOX
++## ------------------- ##"
+       echo
+       for ac_var in $ac_subst_files
+       do
+@@ -1871,11 +1877,9 @@ _ASBOX
+     fi
+ 
+     if test -s confdefs.h; then
+-      cat <<\_ASBOX
+-## ----------- ##
++      $as_echo "## ----------- ##
+ ## confdefs.h. ##
+-## ----------- ##
+-_ASBOX
++## ----------- ##"
+       echo
+       cat confdefs.h
+       echo
+@@ -1930,7 +1934,12 @@ _ACEOF
+ ac_site_file1=NONE
+ ac_site_file2=NONE
+ if test -n "$CONFIG_SITE"; then
+-  ac_site_file1=$CONFIG_SITE
++  # We do not want a PATH search for config.site.
++  case $CONFIG_SITE in #((
++    -*)  ac_site_file1=./$CONFIG_SITE;;
++    */*) ac_site_file1=$CONFIG_SITE;;
++    *)   ac_site_file1=./$CONFIG_SITE;;
++  esac
+ elif test "x$prefix" != xNONE; then
+   ac_site_file1=$prefix/share/config.site
+   ac_site_file2=$prefix/etc/config.site
+@@ -1941,18 +1950,22 @@ fi
+ for ac_site_file in "$ac_site_file1" "$ac_site_file2"
+ do
+   test "x$ac_site_file" = xNONE && continue
+-  if test -r "$ac_site_file"; then
++  if test /dev/null != "$ac_site_file" && test -r "$ac_site_file"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: loading site script $ac_site_file" >&5
+ $as_echo "$as_me: loading site script $ac_site_file" >&6;}
+     sed 's/^/| /' "$ac_site_file" >&5
+-    . "$ac_site_file"
++    . "$ac_site_file" \
++      || { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
++$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
++as_fn_error $? "failed to load site script $ac_site_file
++See \`config.log' for more details" "$LINENO" 5 ; }
+   fi
+ done
+ 
+ if test -r "$cache_file"; then
+-  # Some versions of bash will fail to source /dev/null (special
+-  # files actually), so we avoid doing that.
+-  if test -f "$cache_file"; then
++  # Some versions of bash will fail to source /dev/null (special files
++  # actually), so we avoid doing that.  DJGPP emulates it as a regular file.
++  if test /dev/null != "$cache_file" && test -f "$cache_file"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: loading cache $cache_file" >&5
+ $as_echo "$as_me: loading cache $cache_file" >&6;}
+     case $cache_file in
+@@ -2021,7 +2034,7 @@ if $ac_cache_corrupted; then
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+   { $as_echo "$as_me:${as_lineno-$LINENO}: error: changes in the environment can compromise the build" >&5
+ $as_echo "$as_me: error: changes in the environment can compromise the build" >&2;}
+-  as_fn_error "run \`make distclean' and/or \`rm $cache_file' and start over" "$LINENO" 5
++  as_fn_error $? "run \`make distclean' and/or \`rm $cache_file' and start over" "$LINENO" 5
+ fi
+ ## -------------------- ##
+ ## Main body of script. ##
+@@ -2038,16 +2051,22 @@ am__api_version='1.11'
+ 
+ ac_aux_dir=
+ for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
+-  for ac_t in install-sh install.sh shtool; do
+-    if test -f "$ac_dir/$ac_t"; then
+-      ac_aux_dir=$ac_dir
+-      ac_install_sh="$ac_aux_dir/$ac_t -c"
+-      break 2
+-    fi
+-  done
++  if test -f "$ac_dir/install-sh"; then
++    ac_aux_dir=$ac_dir
++    ac_install_sh="$ac_aux_dir/install-sh -c"
++    break
++  elif test -f "$ac_dir/install.sh"; then
++    ac_aux_dir=$ac_dir
++    ac_install_sh="$ac_aux_dir/install.sh -c"
++    break
++  elif test -f "$ac_dir/shtool"; then
++    ac_aux_dir=$ac_dir
++    ac_install_sh="$ac_aux_dir/shtool install -c"
++    break
++  fi
+ done
+ if test -z "$ac_aux_dir"; then
+-  as_fn_error "cannot find install-sh, install.sh, or shtool in \"$srcdir\" \"$srcdir/..\" \"$srcdir/../..\"" "$LINENO" 5
++  as_fn_error $? "cannot find install-sh, install.sh, or shtool in \"$srcdir\" \"$srcdir/..\" \"$srcdir/../..\"" "$LINENO" 5
+ fi
+ 
+ # These three variables are undocumented and unsupported,
+@@ -2163,11 +2182,11 @@ am_lf='
+ '
+ case `pwd` in
+   *[\\\"\#\$\&\'\`$am_lf]*)
+-    as_fn_error "unsafe absolute working directory name" "$LINENO" 5;;
++    as_fn_error $? "unsafe absolute working directory name" "$LINENO" 5 ;;
+ esac
+ case $srcdir in
+   *[\\\"\#\$\&\'\`$am_lf\ \	]*)
+-    as_fn_error "unsafe srcdir value: \`$srcdir'" "$LINENO" 5;;
++    as_fn_error $? "unsafe srcdir value: \`$srcdir'" "$LINENO" 5 ;;
+ esac
+ 
+ # Do `set' in a subshell so we don't clobber the current shell's
+@@ -2189,7 +2208,7 @@ if (
+       # if, for instance, CONFIG_SHELL is bash and it inherits a
+       # broken ls alias from the environment.  This has actually
+       # happened.  Such a system could not be considered "sane".
+-      as_fn_error "ls -t appears to fail.  Make sure there is not a broken
++      as_fn_error $? "ls -t appears to fail.  Make sure there is not a broken
+ alias in your environment" "$LINENO" 5
+    fi
+ 
+@@ -2199,7 +2218,7 @@ then
+    # Ok.
+    :
+ else
+-   as_fn_error "newly created file is older than distributed files!
++   as_fn_error $? "newly created file is older than distributed files!
+ Check your system clock" "$LINENO" 5
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+@@ -2371,6 +2390,7 @@ IFS=$as_save_IFS
+ 
+ fi
+ 
++  test -d ./--version && rmdir ./--version
+   if test "${ac_cv_path_mkdir+set}" = set; then
+     MKDIR_P="$ac_cv_path_mkdir -p"
+   else
+@@ -2378,7 +2398,6 @@ fi
+     # value for MKDIR_P within a source directory, because that will
+     # break other packages using the cache if that directory is
+     # removed, or if the value is a relative name.
+-    test -d ./--version && rmdir ./--version
+     MKDIR_P="$ac_install_sh -d"
+   fi
+ fi
+@@ -2437,7 +2456,7 @@ done
+ $as_echo_n "checking whether ${MAKE-make} sets \$(MAKE)... " >&6; }
+ set x ${MAKE-make}
+ ac_make=`$as_echo "$2" | sed 's/+/p/g; s/[^a-zA-Z0-9_]/_/g'`
+-if { as_var=ac_cv_prog_make_${ac_make}_set; eval "test \"\${$as_var+set}\" = set"; }; then :
++if eval "test \"\${ac_cv_prog_make_${ac_make}_set+set}\"" = set; then :
+   $as_echo_n "(cached) " >&6
+ else
+   cat >conftest.make <<\_ACEOF
+@@ -2445,7 +2464,7 @@ SHELL = /bin/sh
+ all:
+ 	@echo '@@@%%%=$(MAKE)=@@@%%%'
+ _ACEOF
+-# GNU make sometimes prints "make[1]: Entering...", which would confuse us.
++# GNU make sometimes prints "make[1]: Entering ...", which would confuse us.
+ case `${MAKE-make} -f conftest.make 2>/dev/null` in
+   *@@@%%%=?*=@@@%%%*)
+     eval ac_cv_prog_make_${ac_make}_set=yes;;
+@@ -2479,7 +2498,7 @@ if test "`cd $srcdir && pwd`" != "`pwd`"
+   am__isrc=' -I$(srcdir)'
+   # test to see if srcdir already configured
+   if test -f $srcdir/config.status; then
+-    as_fn_error "source directory already configured; run \"make distclean\" there first" "$LINENO" 5
++    as_fn_error $? "source directory already configured; run \"make distclean\" there first" "$LINENO" 5
+   fi
+ fi
+ 
+@@ -2840,8 +2859,8 @@ fi
+ 
+ test -z "$CC" && { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error "no acceptable C compiler found in \$PATH
+-See \`config.log' for more details." "$LINENO" 5; }
++as_fn_error $? "no acceptable C compiler found in \$PATH
++See \`config.log' for more details" "$LINENO" 5 ; }
+ 
+ # Provide some information about the compiler.
+ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C compiler version" >&5
+@@ -2862,32 +2881,30 @@ $as_echo "$ac_try_echo"; } >&5
+ ... rest of stderr output deleted ...
+          10q' conftest.err >conftest.er1
+     cat conftest.er1 >&5
+-    rm -f conftest.er1 conftest.err
+   fi
++  rm -f conftest.er1 conftest.err
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }
+ done
+ 
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+-#include <stdio.h>
++
+ int
+ main ()
+ {
+-FILE *f = fopen ("conftest.out", "w");
+- return ferror (f) || fclose (f) != 0;
+ 
+   ;
+   return 0;
+ }
+ _ACEOF
+ ac_clean_files_save=$ac_clean_files
+-ac_clean_files="$ac_clean_files a.out a.out.dSYM a.exe b.out conftest.out"
++ac_clean_files="$ac_clean_files a.out a.out.dSYM a.exe b.out"
+ # Try to create an executable without -o first, disregard a.out.
+ # It will help us diagnose broken compilers, and finding out an intuition
+ # of exeext.
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C compiler default output file name" >&5
+-$as_echo_n "checking for C compiler default output file name... " >&6; }
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler works" >&5
++$as_echo_n "checking whether the C compiler works... " >&6; }
+ ac_link_default=`$as_echo "$ac_link" | sed 's/ -o *conftest[^ ]*//'`
+ 
+ # The possible output files:
+@@ -2949,62 +2966,28 @@ test "$ac_cv_exeext" = no && ac_cv_exeex
+ else
+   ac_file=''
+ fi
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_file" >&5
+-$as_echo "$ac_file" >&6; }
+ if test -z "$ac_file"; then :
+-  $as_echo "$as_me: failed program was:" >&5
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
++$as_echo "$as_me: failed program was:" >&5
+ sed 's/^/| /' conftest.$ac_ext >&5
+ 
+ { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-{ as_fn_set_status 77
+-as_fn_error "C compiler cannot create executables
+-See \`config.log' for more details." "$LINENO" 5; }; }
++as_fn_error 77 "C compiler cannot create executables
++See \`config.log' for more details" "$LINENO" 5 ; }
++else
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
++$as_echo "yes" >&6; }
+ fi
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C compiler default output file name" >&5
++$as_echo_n "checking for C compiler default output file name... " >&6; }
++{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_file" >&5
++$as_echo "$ac_file" >&6; }
+ ac_exeext=$ac_cv_exeext
+ 
+-# Check that the compiler produces executables we can run.  If not, either
+-# the compiler is broken, or we cross compile.
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the C compiler works" >&5
+-$as_echo_n "checking whether the C compiler works... " >&6; }
+-# If not cross compiling, check that we can run a simple program.
+-if test "$cross_compiling" != yes; then
+-  if { ac_try='./$ac_file'
+-  { { case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+-$as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_try") 2>&5
+-  ac_status=$?
+-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+-  test $ac_status = 0; }; }; then
+-    cross_compiling=no
+-  else
+-    if test "$cross_compiling" = maybe; then
+-	cross_compiling=yes
+-    else
+-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error "cannot run C compiled programs.
+-If you meant to cross compile, use \`--host'.
+-See \`config.log' for more details." "$LINENO" 5; }
+-    fi
+-  fi
+-fi
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+-$as_echo "yes" >&6; }
+-
+-rm -f -r a.out a.out.dSYM a.exe conftest$ac_cv_exeext b.out conftest.out
++rm -f -r a.out a.out.dSYM a.exe conftest$ac_cv_exeext b.out
+ ac_clean_files=$ac_clean_files_save
+-# Check that the compiler produces executables we can run.  If not, either
+-# the compiler is broken, or we cross compile.
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are cross compiling" >&5
+-$as_echo_n "checking whether we are cross compiling... " >&6; }
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cross_compiling" >&5
+-$as_echo "$cross_compiling" >&6; }
+-
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of executables" >&5
+ $as_echo_n "checking for suffix of executables... " >&6; }
+ if { { ac_try="$ac_link"
+@@ -3034,16 +3017,75 @@ done
+ else
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error "cannot compute suffix of executables: cannot compile and link
+-See \`config.log' for more details." "$LINENO" 5; }
++as_fn_error $? "cannot compute suffix of executables: cannot compile and link
++See \`config.log' for more details" "$LINENO" 5 ; }
+ fi
+-rm -f conftest$ac_cv_exeext
++rm -f conftest conftest$ac_cv_exeext
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
+ $as_echo "$ac_cv_exeext" >&6; }
+ 
+ rm -f conftest.$ac_ext
+ EXEEXT=$ac_cv_exeext
+ ac_exeext=$EXEEXT
++cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++#include <stdio.h>
++int
++main ()
++{
++FILE *f = fopen ("conftest.out", "w");
++ return ferror (f) || fclose (f) != 0;
++
++  ;
++  return 0;
++}
++_ACEOF
++ac_clean_files="$ac_clean_files conftest.out"
++# Check that the compiler produces executables we can run.  If not, either
++# the compiler is broken, or we cross compile.
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are cross compiling" >&5
++$as_echo_n "checking whether we are cross compiling... " >&6; }
++if test "$cross_compiling" != yes; then
++  { { ac_try="$ac_link"
++case "(($ac_try" in
++  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++  *) ac_try_echo=$ac_try;;
++esac
++eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
++$as_echo "$ac_try_echo"; } >&5
++  (eval "$ac_link") 2>&5
++  ac_status=$?
++  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++  test $ac_status = 0; }
++  if { ac_try='./conftest$ac_cv_exeext'
++  { { case "(($ac_try" in
++  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++  *) ac_try_echo=$ac_try;;
++esac
++eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
++$as_echo "$ac_try_echo"; } >&5
++  (eval "$ac_try") 2>&5
++  ac_status=$?
++  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++  test $ac_status = 0; }; }; then
++    cross_compiling=no
++  else
++    if test "$cross_compiling" = maybe; then
++	cross_compiling=yes
++    else
++	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
++$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
++as_fn_error $? "cannot run C compiled programs.
++If you meant to cross compile, use \`--host'.
++See \`config.log' for more details" "$LINENO" 5 ; }
++    fi
++  fi
++fi
++{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cross_compiling" >&5
++$as_echo "$cross_compiling" >&6; }
++
++rm -f conftest.$ac_ext conftest$ac_cv_exeext conftest.out
++ac_clean_files=$ac_clean_files_save
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of object files" >&5
+ $as_echo_n "checking for suffix of object files... " >&6; }
+ if test "${ac_cv_objext+set}" = set; then :
+@@ -3086,8 +3128,8 @@ sed 's/^/| /' conftest.$ac_ext >&5
+ 
+ { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error "cannot compute suffix of object files: cannot compile
+-See \`config.log' for more details." "$LINENO" 5; }
++as_fn_error $? "cannot compute suffix of object files: cannot compile
++See \`config.log' for more details" "$LINENO" 5 ; }
+ fi
+ rm -f conftest.$ac_cv_objext conftest.$ac_ext
+ fi
+@@ -3720,6 +3762,10 @@ fi
+ 
+ 
+ 
++
++
++
++
+ if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+ 	if test -n "$ac_tool_prefix"; then
+   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
+@@ -3832,18 +3878,16 @@ $as_echo "yes" >&6; }
+ $as_echo "no" >&6; }
+ 		PKG_CONFIG=""
+ 	fi
+-
+ fi
+ 
+ pkg_failed=no
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libusb" >&5
+ $as_echo_n "checking for libusb... " >&6; }
+ 
+-if test -n "$PKG_CONFIG"; then
+-    if test -n "$libusb_CFLAGS"; then
+-        pkg_cv_libusb_CFLAGS="$libusb_CFLAGS"
+-    else
+-        if test -n "$PKG_CONFIG" && \
++if test -n "$libusb_CFLAGS"; then
++    pkg_cv_libusb_CFLAGS="$libusb_CFLAGS"
++ elif test -n "$PKG_CONFIG"; then
++    if test -n "$PKG_CONFIG" && \
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libusb\""; } >&5
+   ($PKG_CONFIG --exists --print-errors "libusb") 2>&5
+   ac_status=$?
+@@ -3853,15 +3897,13 @@ if test -n "$PKG_CONFIG"; then
+ else
+   pkg_failed=yes
+ fi
+-    fi
+-else
+-	pkg_failed=untried
++ else
++    pkg_failed=untried
+ fi
+-if test -n "$PKG_CONFIG"; then
+-    if test -n "$libusb_LIBS"; then
+-        pkg_cv_libusb_LIBS="$libusb_LIBS"
+-    else
+-        if test -n "$PKG_CONFIG" && \
++if test -n "$libusb_LIBS"; then
++    pkg_cv_libusb_LIBS="$libusb_LIBS"
++ elif test -n "$PKG_CONFIG"; then
++    if test -n "$PKG_CONFIG" && \
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libusb\""; } >&5
+   ($PKG_CONFIG --exists --print-errors "libusb") 2>&5
+   ac_status=$?
+@@ -3871,14 +3913,15 @@ if test -n "$PKG_CONFIG"; then
+ else
+   pkg_failed=yes
+ fi
+-    fi
+-else
+-	pkg_failed=untried
++ else
++    pkg_failed=untried
+ fi
+ 
+ 
+ 
+ if test $pkg_failed = yes; then
++   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
+ 
+ if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+         _pkg_short_errors_supported=yes
+@@ -3886,16 +3929,14 @@ else
+         _pkg_short_errors_supported=no
+ fi
+         if test $_pkg_short_errors_supported = yes; then
+-	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "libusb"`
++	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libusb" 2>&1`
+         else
+-	        libusb_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "libusb"`
++	        libusb_PKG_ERRORS=`$PKG_CONFIG --print-errors "libusb" 2>&1`
+         fi
+ 	# Put the nasty error message in config.log where it belongs
+ 	echo "$libusb_PKG_ERRORS" >&5
+ 
+-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+-$as_echo "no" >&6; }
+-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lusb" >&5
++	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lusb" >&5
+ $as_echo_n "checking for main in -lusb... " >&6; }
+ if test "${ac_cv_lib_usb_main+set}" = set; then :
+   $as_echo_n "(cached) " >&6
+@@ -3938,6 +3979,8 @@ fi
+ 
+ 
+ elif test $pkg_failed = untried; then
++     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
+ 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lusb" >&5
+ $as_echo_n "checking for main in -lusb... " >&6; }
+ if test "${ac_cv_lib_usb_main+set}" = set; then :
+@@ -4040,7 +4083,7 @@ else
+   # Broken: fails on valid input.
+ continue
+ fi
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.err conftest.i conftest.$ac_ext
+ 
+   # OK, works on sane cases.  Now check whether nonexistent headers
+   # can be detected and how.
+@@ -4056,11 +4099,11 @@ else
+ ac_preproc_ok=:
+ break
+ fi
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.err conftest.i conftest.$ac_ext
+ 
+ done
+ # Because of `break', _AC_PREPROC_IFELSE's cleaning code was skipped.
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.i conftest.err conftest.$ac_ext
+ if $ac_preproc_ok; then :
+   break
+ fi
+@@ -4099,7 +4142,7 @@ else
+   # Broken: fails on valid input.
+ continue
+ fi
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.err conftest.i conftest.$ac_ext
+ 
+   # OK, works on sane cases.  Now check whether nonexistent headers
+   # can be detected and how.
+@@ -4115,18 +4158,18 @@ else
+ ac_preproc_ok=:
+ break
+ fi
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.err conftest.i conftest.$ac_ext
+ 
+ done
+ # Because of `break', _AC_PREPROC_IFELSE's cleaning code was skipped.
+-rm -f conftest.err conftest.$ac_ext
++rm -f conftest.i conftest.err conftest.$ac_ext
+ if $ac_preproc_ok; then :
+ 
+ else
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error "C preprocessor \"$CPP\" fails sanity check
+-See \`config.log' for more details." "$LINENO" 5; }
++as_fn_error $? "C preprocessor \"$CPP\" fails sanity check
++See \`config.log' for more details" "$LINENO" 5 ; }
+ fi
+ 
+ ac_ext=c
+@@ -4187,7 +4230,7 @@ esac
+   done
+ IFS=$as_save_IFS
+   if test -z "$ac_cv_path_GREP"; then
+-    as_fn_error "no acceptable grep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
++    as_fn_error $? "no acceptable grep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+   fi
+ else
+   ac_cv_path_GREP=$GREP
+@@ -4253,7 +4296,7 @@ esac
+   done
+ IFS=$as_save_IFS
+   if test -z "$ac_cv_path_EGREP"; then
+-    as_fn_error "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
++    as_fn_error $? "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+   fi
+ else
+   ac_cv_path_EGREP=$EGREP
+@@ -4385,8 +4428,7 @@ do :
+   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+ "
+-eval as_val=\$$as_ac_Header
+-   if test "x$as_val" = x""yes; then :
++if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+   cat >>confdefs.h <<_ACEOF
+ #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+ _ACEOF
+@@ -4400,8 +4442,7 @@ for ac_header in stdlib.h string.h unist
+ do :
+   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+-eval as_val=\$$as_ac_Header
+-   if test "x$as_val" = x""yes; then :
++if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+   cat >>confdefs.h <<_ACEOF
+ #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+ _ACEOF
+@@ -4415,7 +4456,7 @@ done
+ 
+ # Checks for library functions.
+ 
+-ac_config_files="$ac_config_files Makefile"
++ac_config_files="$ac_config_files Makefile src/Makefile"
+ 
+ cat >confcache <<\_ACEOF
+ # This file is a shell script that caches the results of configure
+@@ -4500,6 +4541,7 @@ DEFS=-DHAVE_CONFIG_H
+ 
+ ac_libobjs=
+ ac_ltlibobjs=
++U=
+ for ac_i in : $LIBOBJS; do test "x$ac_i" = x: && continue
+   # 1. Remove the extension, and $U if already installed.
+   ac_script='s/\$U\././;s/\.o$//;s/\.obj$//'
+@@ -4523,11 +4565,11 @@ else
+ fi
+ 
+ if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
+-  as_fn_error "conditional \"AMDEP\" was never defined.
++  as_fn_error $? "conditional \"AMDEP\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
+ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
+-  as_fn_error "conditional \"am__fastdepCC\" was never defined.
++  as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
+ 
+@@ -4677,19 +4719,19 @@ export LANGUAGE
+ (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
+ 
+ 
+-# as_fn_error ERROR [LINENO LOG_FD]
+-# ---------------------------------
++# as_fn_error STATUS ERROR [LINENO LOG_FD]
++# ----------------------------------------
+ # Output "`basename $0`: error: ERROR" to stderr. If LINENO and LOG_FD are
+ # provided, also output the error to LOG_FD, referencing LINENO. Then exit the
+-# script with status $?, using 1 if that was 0.
++# script with STATUS, using 1 if that was 0.
+ as_fn_error ()
+ {
+-  as_status=$?; test $as_status -eq 0 && as_status=1
+-  if test "$3"; then
+-    as_lineno=${as_lineno-"$2"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+-    $as_echo "$as_me:${as_lineno-$LINENO}: error: $1" >&$3
++  as_status=$1; test $as_status -eq 0 && as_status=1
++  if test "$4"; then
++    as_lineno=${as_lineno-"$3"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
++    $as_echo "$as_me:${as_lineno-$LINENO}: error: $2" >&$4
+   fi
+-  $as_echo "$as_me: error: $1" >&2
++  $as_echo "$as_me: error: $2" >&2
+   as_fn_exit $as_status
+ } # as_fn_error
+ 
+@@ -4885,7 +4927,7 @@ $as_echo X"$as_dir" |
+       test -d "$as_dir" && break
+     done
+     test -z "$as_dirs" || eval "mkdir $as_dirs"
+-  } || test -d "$as_dir" || as_fn_error "cannot create directory $as_dir"
++  } || test -d "$as_dir" || as_fn_error $? "cannot create directory $as_dir"
+ 
+ 
+ } # as_fn_mkdir_p
+@@ -4939,7 +4981,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_wri
+ # values after options handling.
+ ac_log="
+ This file was extended by $as_me, which was
+-generated by GNU Autoconf 2.64.  Invocation command line was
++generated by GNU Autoconf 2.67.  Invocation command line was
+ 
+   CONFIG_FILES    = $CONFIG_FILES
+   CONFIG_HEADERS  = $CONFIG_HEADERS
+@@ -4979,6 +5021,7 @@ Usage: $0 [OPTION]... [TAG]...
+ 
+   -h, --help       print this help, then exit
+   -V, --version    print version number and configuration settings, then exit
++      --config     print configuration, then exit
+   -q, --quiet, --silent
+                    do not print progress messages
+   -d, --debug      don't remove temporary files
+@@ -5001,12 +5044,13 @@ Report bugs to the package provider."
+ 
+ _ACEOF
+ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
++ac_cs_config="`$as_echo "$ac_configure_args" | sed 's/^ //; s/[\\""\`\$]/\\\\&/g'`"
+ ac_cs_version="\\
+ config.status
+-configured by $0, generated by GNU Autoconf 2.64,
+-  with options \\"`$as_echo "$ac_configure_args" | sed 's/^ //; s/[\\""\`\$]/\\\\&/g'`\\"
++configured by $0, generated by GNU Autoconf 2.67,
++  with options \\"\$ac_cs_config\\"
+ 
+-Copyright (C) 2009 Free Software Foundation, Inc.
++Copyright (C) 2010 Free Software Foundation, Inc.
+ This config.status script is free software; the Free Software Foundation
+ gives unlimited permission to copy, distribute and modify it."
+ 
+@@ -5024,11 +5068,16 @@ ac_need_defaults=:
+ while test $# != 0
+ do
+   case $1 in
+-  --*=*)
++  --*=?*)
+     ac_option=`expr "X$1" : 'X\([^=]*\)='`
+     ac_optarg=`expr "X$1" : 'X[^=]*=\(.*\)'`
+     ac_shift=:
+     ;;
++  --*=)
++    ac_option=`expr "X$1" : 'X\([^=]*\)='`
++    ac_optarg=
++    ac_shift=:
++    ;;
+   *)
+     ac_option=$1
+     ac_optarg=$2
+@@ -5042,12 +5091,15 @@ do
+     ac_cs_recheck=: ;;
+   --version | --versio | --versi | --vers | --ver | --ve | --v | -V )
+     $as_echo "$ac_cs_version"; exit ;;
++  --config | --confi | --conf | --con | --co | --c )
++    $as_echo "$ac_cs_config"; exit ;;
+   --debug | --debu | --deb | --de | --d | -d )
+     debug=: ;;
+   --file | --fil | --fi | --f )
+     $ac_shift
+     case $ac_optarg in
+     *\'*) ac_optarg=`$as_echo "$ac_optarg" | sed "s/'/'\\\\\\\\''/g"` ;;
++    '') as_fn_error $? "missing file argument" ;;
+     esac
+     as_fn_append CONFIG_FILES " '$ac_optarg'"
+     ac_need_defaults=false;;
+@@ -5060,7 +5112,7 @@ do
+     ac_need_defaults=false;;
+   --he | --h)
+     # Conflict between --help and --header
+-    as_fn_error "ambiguous option: \`$1'
++    as_fn_error $? "ambiguous option: \`$1'
+ Try \`$0 --help' for more information.";;
+   --help | --hel | -h )
+     $as_echo "$ac_cs_usage"; exit ;;
+@@ -5069,7 +5121,7 @@ Try \`$0 --help' for more information.";
+     ac_cs_silent=: ;;
+ 
+   # This is an error.
+-  -*) as_fn_error "unrecognized option: \`$1'
++  -*) as_fn_error $? "unrecognized option: \`$1'
+ Try \`$0 --help' for more information." ;;
+ 
+   *) as_fn_append ac_config_targets " $1"
+@@ -5126,8 +5178,9 @@ do
+     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
+     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
+     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
++    "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+ 
+-  *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
++  *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5 ;;
+   esac
+ done
+ 
+@@ -5165,7 +5218,7 @@ $debug ||
+ {
+   tmp=./conf$$-$RANDOM
+   (umask 077 && mkdir "$tmp")
+-} || as_fn_error "cannot create a temporary directory in ." "$LINENO" 5
++} || as_fn_error $? "cannot create a temporary directory in ." "$LINENO" 5
+ 
+ # Set up the scripts for CONFIG_FILES section.
+ # No need to generate them if there are no CONFIG_FILES.
+@@ -5182,7 +5235,7 @@ if test "x$ac_cr" = x; then
+ fi
+ ac_cs_awk_cr=`$AWK 'BEGIN { print "a\rb" }' </dev/null 2>/dev/null`
+ if test "$ac_cs_awk_cr" = "a${ac_cr}b"; then
+-  ac_cs_awk_cr='\r'
++  ac_cs_awk_cr='\\r'
+ else
+   ac_cs_awk_cr=$ac_cr
+ fi
+@@ -5196,18 +5249,18 @@ _ACEOF
+   echo "$ac_subst_vars" | sed 's/.*/&!$&$ac_delim/' &&
+   echo "_ACEOF"
+ } >conf$$subs.sh ||
+-  as_fn_error "could not make $CONFIG_STATUS" "$LINENO" 5
+-ac_delim_num=`echo "$ac_subst_vars" | grep -c '$'`
++  as_fn_error $? "could not make $CONFIG_STATUS" "$LINENO" 5
++ac_delim_num=`echo "$ac_subst_vars" | grep -c '^'`
+ ac_delim='%!_!# '
+ for ac_last_try in false false false false false :; do
+   . ./conf$$subs.sh ||
+-    as_fn_error "could not make $CONFIG_STATUS" "$LINENO" 5
++    as_fn_error $? "could not make $CONFIG_STATUS" "$LINENO" 5
+ 
+   ac_delim_n=`sed -n "s/.*$ac_delim\$/X/p" conf$$subs.awk | grep -c X`
+   if test $ac_delim_n = $ac_delim_num; then
+     break
+   elif $ac_last_try; then
+-    as_fn_error "could not make $CONFIG_STATUS" "$LINENO" 5
++    as_fn_error $? "could not make $CONFIG_STATUS" "$LINENO" 5
+   else
+     ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
+   fi
+@@ -5229,7 +5282,7 @@ s/'"$ac_delim"'$//
+ t delim
+ :nl
+ h
+-s/\(.\{148\}\).*/\1/
++s/\(.\{148\}\)..*/\1/
+ t more1
+ s/["\\]/\\&/g; s/^/"/; s/$/\\n"\\/
+ p
+@@ -5243,7 +5296,7 @@ s/.\{148\}//
+ t nl
+ :delim
+ h
+-s/\(.\{148\}\).*/\1/
++s/\(.\{148\}\)..*/\1/
+ t more2
+ s/["\\]/\\&/g; s/^/"/; s/$/"/
+ p
+@@ -5296,20 +5349,28 @@ if sed "s/$ac_cr//" < /dev/null > /dev/n
+ else
+   cat
+ fi < "$tmp/subs1.awk" > "$tmp/subs.awk" \
+-  || as_fn_error "could not setup config files machinery" "$LINENO" 5
++  || as_fn_error $? "could not setup config files machinery" "$LINENO" 5
+ _ACEOF
+ 
+-# VPATH may cause trouble with some makes, so we remove $(srcdir),
+-# ${srcdir} and @srcdir@ from VPATH if srcdir is ".", strip leading and
++# VPATH may cause trouble with some makes, so we remove sole $(srcdir),
++# ${srcdir} and @srcdir@ entries from VPATH if srcdir is ".", strip leading and
+ # trailing colons and then remove the whole line if VPATH becomes empty
+ # (actually we leave an empty line to preserve line numbers).
+ if test "x$srcdir" = x.; then
+-  ac_vpsub='/^[	 ]*VPATH[	 ]*=/{
+-s/:*\$(srcdir):*/:/
+-s/:*\${srcdir}:*/:/
+-s/:*@srcdir@:*/:/
+-s/^\([^=]*=[	 ]*\):*/\1/
++  ac_vpsub='/^[	 ]*VPATH[	 ]*=[	 ]*/{
++h
++s///
++s/^/:/
++s/[	 ]*$/:/
++s/:\$(srcdir):/:/g
++s/:\${srcdir}:/:/g
++s/:@srcdir@:/:/g
++s/^:*//
+ s/:*$//
++x
++s/\(=[	 ]*\).*/\1/
++G
++s/\n//
+ s/^[^=]*=[	 ]*$//
+ }'
+ fi
+@@ -5337,7 +5398,7 @@ for ac_last_try in false false :; do
+   if test -z "$ac_t"; then
+     break
+   elif $ac_last_try; then
+-    as_fn_error "could not make $CONFIG_HEADERS" "$LINENO" 5
++    as_fn_error $? "could not make $CONFIG_HEADERS" "$LINENO" 5
+   else
+     ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
+   fi
+@@ -5422,7 +5483,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_writ
+ _ACAWK
+ _ACEOF
+ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
+-  as_fn_error "could not setup config headers machinery" "$LINENO" 5
++  as_fn_error $? "could not setup config headers machinery" "$LINENO" 5
+ fi # test -n "$CONFIG_HEADERS"
+ 
+ 
+@@ -5435,7 +5496,7 @@ do
+   esac
+   case $ac_mode$ac_tag in
+   :[FHL]*:*);;
+-  :L* | :C*:*) as_fn_error "invalid tag \`$ac_tag'" "$LINENO" 5;;
++  :L* | :C*:*) as_fn_error $? "invalid tag \`$ac_tag'" "$LINENO" 5 ;;
+   :[FH]-) ac_tag=-:-;;
+   :[FH]*) ac_tag=$ac_tag:$ac_tag.in;;
+   esac
+@@ -5463,7 +5524,7 @@ do
+ 	   [\\/$]*) false;;
+ 	   *) test -f "$srcdir/$ac_f" && ac_f="$srcdir/$ac_f";;
+ 	   esac ||
+-	   as_fn_error "cannot find input file: \`$ac_f'" "$LINENO" 5;;
++	   as_fn_error 1 "cannot find input file: \`$ac_f'" "$LINENO" 5 ;;
+       esac
+       case $ac_f in *\'*) ac_f=`$as_echo "$ac_f" | sed "s/'/'\\\\\\\\''/g"`;; esac
+       as_fn_append ac_file_inputs " '$ac_f'"
+@@ -5490,7 +5551,7 @@ $as_echo "$as_me: creating $ac_file" >&6
+ 
+     case $ac_tag in
+     *:-:* | *:-) cat >"$tmp/stdin" \
+-      || as_fn_error "could not create $ac_file" "$LINENO" 5 ;;
++      || as_fn_error $? "could not create $ac_file" "$LINENO" 5  ;;
+     esac
+     ;;
+   esac
+@@ -5627,22 +5688,22 @@ s&@MKDIR_P@&$ac_MKDIR_P&;t t
+ $ac_datarootdir_hack
+ "
+ eval sed \"\$ac_sed_extra\" "$ac_file_inputs" | $AWK -f "$tmp/subs.awk" >$tmp/out \
+-  || as_fn_error "could not create $ac_file" "$LINENO" 5
++  || as_fn_error $? "could not create $ac_file" "$LINENO" 5
+ 
+ test -z "$ac_datarootdir_hack$ac_datarootdir_seen" &&
+   { ac_out=`sed -n '/\${datarootdir}/p' "$tmp/out"`; test -n "$ac_out"; } &&
+   { ac_out=`sed -n '/^[	 ]*datarootdir[	 ]*:*=/p' "$tmp/out"`; test -z "$ac_out"; } &&
+   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $ac_file contains a reference to the variable \`datarootdir'
+-which seems to be undefined.  Please make sure it is defined." >&5
++which seems to be undefined.  Please make sure it is defined" >&5
+ $as_echo "$as_me: WARNING: $ac_file contains a reference to the variable \`datarootdir'
+-which seems to be undefined.  Please make sure it is defined." >&2;}
++which seems to be undefined.  Please make sure it is defined" >&2;}
+ 
+   rm -f "$tmp/stdin"
+   case $ac_file in
+   -) cat "$tmp/out" && rm -f "$tmp/out";;
+   *) rm -f "$ac_file" && mv "$tmp/out" "$ac_file";;
+   esac \
+-  || as_fn_error "could not create $ac_file" "$LINENO" 5
++  || as_fn_error $? "could not create $ac_file" "$LINENO" 5
+  ;;
+   :H)
+   #
+@@ -5653,19 +5714,19 @@ which seems to be undefined.  Please mak
+       $as_echo "/* $configure_input  */" \
+       && eval '$AWK -f "$tmp/defines.awk"' "$ac_file_inputs"
+     } >"$tmp/config.h" \
+-      || as_fn_error "could not create $ac_file" "$LINENO" 5
++      || as_fn_error $? "could not create $ac_file" "$LINENO" 5
+     if diff "$ac_file" "$tmp/config.h" >/dev/null 2>&1; then
+       { $as_echo "$as_me:${as_lineno-$LINENO}: $ac_file is unchanged" >&5
+ $as_echo "$as_me: $ac_file is unchanged" >&6;}
+     else
+       rm -f "$ac_file"
+       mv "$tmp/config.h" "$ac_file" \
+-	|| as_fn_error "could not create $ac_file" "$LINENO" 5
++	|| as_fn_error $? "could not create $ac_file" "$LINENO" 5
+     fi
+   else
+     $as_echo "/* $configure_input  */" \
+       && eval '$AWK -f "$tmp/defines.awk"' "$ac_file_inputs" \
+-      || as_fn_error "could not create -" "$LINENO" 5
++      || as_fn_error $? "could not create -" "$LINENO" 5
+   fi
+ # Compute "$ac_file"'s index in $config_headers.
+ _am_arg="$ac_file"
+@@ -5815,7 +5876,7 @@ _ACEOF
+ ac_clean_files=$ac_clean_files_save
+ 
+ test $ac_write_fail = 0 ||
+-  as_fn_error "write failure creating $CONFIG_STATUS" "$LINENO" 5
++  as_fn_error $? "write failure creating $CONFIG_STATUS" "$LINENO" 5
+ 
+ 
+ # configure is writing to config.log, and then calls config.status.
+@@ -5836,7 +5897,7 @@ if test "$no_create" != yes; then
+   exec 5>>config.log
+   # Use ||, not &&, to avoid exiting from the if with $? = 1, which
+   # would make configure fail if this is the last instruction.
+-  $ac_cs_success || as_fn_exit $?
++  $ac_cs_success || as_fn_exit 1
+ fi
+ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
+--- usbsoftrock-1.0.2~svn5.orig/Makefile.in
++++ usbsoftrock-1.0.2~svn5/Makefile.in
+@@ -1,4 +1,4 @@
+-# Makefile.in generated by automake 1.11 from Makefile.am.
++# Makefile.in generated by automake 1.11.1 from Makefile.am.
+ # @configure_input@
+ 
+ # Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+@@ -14,7 +14,6 @@
+ # PARTICULAR PURPOSE.
+ 
+ @SET_MAKE@
+-
+ VPATH = @srcdir@
+ pkgdatadir = $(datadir)/@PACKAGE@
+ pkgincludedir = $(includedir)/@PACKAGE@
+@@ -32,7 +31,6 @@ POST_INSTALL = :
+ NORMAL_UNINSTALL = :
+ PRE_UNINSTALL = :
+ POST_UNINSTALL = :
+-bin_PROGRAMS = usbsoftrock$(EXEEXT)
+ subdir = .
+ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
+ 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
+@@ -48,24 +46,23 @@ mkinstalldirs = $(install_sh) -d
+ CONFIG_HEADER = config.h
+ CONFIG_CLEAN_FILES =
+ CONFIG_CLEAN_VPATH_FILES =
+-am__installdirs = "$(DESTDIR)$(bindir)"
+-PROGRAMS = $(bin_PROGRAMS)
+-am_usbsoftrock_OBJECTS = usbsoftrock.$(OBJEXT) operations.$(OBJEXT) \
+-	config_ops.$(OBJEXT) interactive.$(OBJEXT)
+-usbsoftrock_OBJECTS = $(am_usbsoftrock_OBJECTS)
+-usbsoftrock_DEPENDENCIES =
+-DEFAULT_INCLUDES = -I.@am__isrc@
+-depcomp = $(SHELL) $(top_srcdir)/depcomp
+-am__depfiles_maybe = depfiles
+-am__mv = mv -f
+-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+-CCLD = $(CC)
+-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-SOURCES = $(usbsoftrock_SOURCES)
+-DIST_SOURCES = $(usbsoftrock_SOURCES)
++SOURCES =
++DIST_SOURCES =
++RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
++	html-recursive info-recursive install-data-recursive \
++	install-dvi-recursive install-exec-recursive \
++	install-html-recursive install-info-recursive \
++	install-pdf-recursive install-ps-recursive install-recursive \
++	installcheck-recursive installdirs-recursive pdf-recursive \
++	ps-recursive uninstall-recursive
++RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
++  distclean-recursive maintainer-clean-recursive
++AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
++	$(RECURSIVE_CLEAN_TARGETS:-recursive=) tags TAGS ctags CTAGS \
++	distdir dist dist-all distcheck
+ ETAGS = etags
+ CTAGS = ctags
++DIST_SUBDIRS = $(SUBDIRS)
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ distdir = $(PACKAGE)-$(VERSION)
+ top_distdir = $(distdir)
+@@ -73,6 +70,31 @@ am__remove_distdir = \
+   { test ! -d "$(distdir)" \
+     || { find "$(distdir)" -type d ! -perm -200 -exec chmod u+w {} ';' \
+          && rm -fr "$(distdir)"; }; }
++am__relativize = \
++  dir0=`pwd`; \
++  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
++  sed_rest='s,^[^/]*/*,,'; \
++  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
++  sed_butlast='s,/*[^/]*$$,,'; \
++  while test -n "$$dir1"; do \
++    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
++    if test "$$first" != "."; then \
++      if test "$$first" = ".."; then \
++        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
++        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
++      else \
++        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
++        if test "$$first2" = "$$first"; then \
++          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
++        else \
++          dir2="../$$dir2"; \
++        fi; \
++        dir0="$$dir0"/"$$first"; \
++      fi; \
++    fi; \
++    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
++  done; \
++  reldir="$$dir2"
+ DIST_ARCHIVES = $(distdir).tar.gz
+ GZIP_ENV = --best
+ distuninstallcheck_listfiles = find . -type f -print
+@@ -118,6 +140,8 @@ PACKAGE_URL = @PACKAGE_URL@
+ PACKAGE_VERSION = @PACKAGE_VERSION@
+ PATH_SEPARATOR = @PATH_SEPARATOR@
+ PKG_CONFIG = @PKG_CONFIG@
++PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
++PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+ SET_MAKE = @SET_MAKE@
+ SHELL = @SHELL@
+ STRIP = @STRIP@
+@@ -166,16 +190,11 @@ target_alias = @target_alias@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-usbsoftrock_SOURCES = usbsoftrock.c operations.c operations.h config_ops.c config_ops.h \
+-	interactive.c interactive.h
+-
+-usbsoftrock_LDADD = -lm
+-INCLUDES = $(libusb_CFLAGS)
++SUBDIRS = src
+ all: config.h
+-	$(MAKE) $(AM_MAKEFLAGS) all-am
++	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+ 
+ .SUFFIXES:
+-.SUFFIXES: .c .o .obj
+ am--refresh:
+ 	@:
+ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+@@ -227,71 +246,76 @@ $(srcdir)/config.h.in:  $(am__configure_
+ 
+ distclean-hdr:
+ 	-rm -f config.h stamp-h1
+-install-binPROGRAMS: $(bin_PROGRAMS)
+-	@$(NORMAL_INSTALL)
+-	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
+-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+-	for p in $$list; do echo "$$p $$p"; done | \
+-	sed 's/$(EXEEXT)$$//' | \
+-	while read p p1; do if test -f $$p; \
+-	  then echo "$$p"; echo "$$p"; else :; fi; \
+-	done | \
+-	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+-	sed 'N;N;N;s,\n, ,g' | \
+-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+-	    else { print "f", $$3 "/" $$4, $$1; } } \
+-	  END { for (d in files) print "f", d, files[d] }' | \
+-	while read type dir files; do \
+-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+-	    test -z "$$files" || { \
+-	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+-	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+-	    } \
+-	; done
+-
+-uninstall-binPROGRAMS:
+-	@$(NORMAL_UNINSTALL)
+-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+-	files=`for p in $$list; do echo "$$p"; done | \
+-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+-	      -e 's/$$/$(EXEEXT)/' `; \
+-	test -n "$$list" || exit 0; \
+-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
+-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
+-
+-clean-binPROGRAMS:
+-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+-usbsoftrock$(EXEEXT): $(usbsoftrock_OBJECTS) $(usbsoftrock_DEPENDENCIES) 
+-	@rm -f usbsoftrock$(EXEEXT)
+-	$(LINK) $(usbsoftrock_OBJECTS) $(usbsoftrock_LDADD) $(LIBS)
+-
+-mostlyclean-compile:
+-	-rm -f *.$(OBJEXT)
+-
+-distclean-compile:
+-	-rm -f *.tab.c
+-
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config_ops.Po@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interactive.Po@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/operations.Po@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usbsoftrock.Po@am__quote@
+-
+-.c.o:
+-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+-
+-.c.obj:
+-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
++
++# This directory's subdirectories are mostly independent; you can cd
++# into them and run `make' without going through this Makefile.
++# To change the values of `make' variables: instead of editing Makefiles,
++# (1) if the variable is set in `config.status', edit `config.status'
++#     (which will cause the Makefiles to be regenerated when you run `make');
++# (2) otherwise, pass the desired values on the `make' command line.
++$(RECURSIVE_TARGETS):
++	@fail= failcom='exit 1'; \
++	for f in x $$MAKEFLAGS; do \
++	  case $$f in \
++	    *=* | --[!k]*);; \
++	    *k*) failcom='fail=yes';; \
++	  esac; \
++	done; \
++	dot_seen=no; \
++	target=`echo $@ | sed s/-recursive//`; \
++	list='$(SUBDIRS)'; for subdir in $$list; do \
++	  echo "Making $$target in $$subdir"; \
++	  if test "$$subdir" = "."; then \
++	    dot_seen=yes; \
++	    local_target="$$target-am"; \
++	  else \
++	    local_target="$$target"; \
++	  fi; \
++	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
++	  || eval $$failcom; \
++	done; \
++	if test "$$dot_seen" = "no"; then \
++	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
++	fi; test -z "$$fail"
++
++$(RECURSIVE_CLEAN_TARGETS):
++	@fail= failcom='exit 1'; \
++	for f in x $$MAKEFLAGS; do \
++	  case $$f in \
++	    *=* | --[!k]*);; \
++	    *k*) failcom='fail=yes';; \
++	  esac; \
++	done; \
++	dot_seen=no; \
++	case "$@" in \
++	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
++	  *) list='$(SUBDIRS)' ;; \
++	esac; \
++	rev=''; for subdir in $$list; do \
++	  if test "$$subdir" = "."; then :; else \
++	    rev="$$subdir $$rev"; \
++	  fi; \
++	done; \
++	rev="$$rev ."; \
++	target=`echo $@ | sed s/-recursive//`; \
++	for subdir in $$rev; do \
++	  echo "Making $$target in $$subdir"; \
++	  if test "$$subdir" = "."; then \
++	    local_target="$$target-am"; \
++	  else \
++	    local_target="$$target"; \
++	  fi; \
++	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
++	  || eval $$failcom; \
++	done && test -z "$$fail"
++tags-recursive:
++	list='$(SUBDIRS)'; for subdir in $$list; do \
++	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
++	done
++ctags-recursive:
++	list='$(SUBDIRS)'; for subdir in $$list; do \
++	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
++	done
+ 
+ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+ 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
+@@ -303,10 +327,23 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS
+ 	mkid -fID $$unique
+ tags: TAGS
+ 
+-TAGS:  $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) \
++TAGS: tags-recursive $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) \
+ 		$(TAGS_FILES) $(LISP)
+ 	set x; \
+ 	here=`pwd`; \
++	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
++	  include_option=--etags-include; \
++	  empty_fix=.; \
++	else \
++	  include_option=--include; \
++	  empty_fix=; \
++	fi; \
++	list='$(SUBDIRS)'; for subdir in $$list; do \
++	  if test "$$subdir" = .; then :; else \
++	    test ! -f $$subdir/TAGS || \
++	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
++	  fi; \
++	done; \
+ 	list='$(SOURCES) $(HEADERS) config.h.in $(LISP) $(TAGS_FILES)'; \
+ 	unique=`for i in $$list; do \
+ 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+@@ -325,7 +362,7 @@ TAGS:  $(HEADERS) $(SOURCES) config.h.in
+ 	  fi; \
+ 	fi
+ ctags: CTAGS
+-CTAGS:  $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) \
++CTAGS: ctags-recursive $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) \
+ 		$(TAGS_FILES) $(LISP)
+ 	list='$(SOURCES) $(HEADERS) config.h.in $(LISP) $(TAGS_FILES)'; \
+ 	unique=`for i in $$list; do \
+@@ -377,8 +414,37 @@ distdir: $(DISTFILES)
+ 	    || exit 1; \
+ 	  fi; \
+ 	done
++	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
++	  if test "$$subdir" = .; then :; else \
++	    test -d "$(distdir)/$$subdir" \
++	    || $(MKDIR_P) "$(distdir)/$$subdir" \
++	    || exit 1; \
++	  fi; \
++	done
++	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
++	  if test "$$subdir" = .; then :; else \
++	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
++	    $(am__relativize); \
++	    new_distdir=$$reldir; \
++	    dir1=$$subdir; dir2="$(top_distdir)"; \
++	    $(am__relativize); \
++	    new_top_distdir=$$reldir; \
++	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
++	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
++	    ($(am__cd) $$subdir && \
++	      $(MAKE) $(AM_MAKEFLAGS) \
++	        top_distdir="$$new_top_distdir" \
++	        distdir="$$new_distdir" \
++		am__remove_distdir=: \
++		am__skip_length_check=: \
++		am__skip_mode_fix=: \
++	        distdir) \
++	      || exit 1; \
++	  fi; \
++	done
+ 	-test -n "$(am__skip_mode_fix)" \
+-	|| find "$(distdir)" -type d ! -perm -777 -exec chmod a+rwx {} \; -o \
++	|| find "$(distdir)" -type d ! -perm -755 \
++		-exec chmod u+rwx,go+rx {} \; -o \
+ 	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
+ 	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
+ 	  ! -type d ! -perm -444 -exec $(install_sh) -c -m a+r {} {} \; \
+@@ -422,17 +488,17 @@ dist dist-all: distdir
+ distcheck: dist
+ 	case '$(DIST_ARCHIVES)' in \
+ 	*.tar.gz*) \
+-	  GZIP=$(GZIP_ENV) gunzip -c $(distdir).tar.gz | $(am__untar) ;;\
++	  GZIP=$(GZIP_ENV) gzip -dc $(distdir).tar.gz | $(am__untar) ;;\
+ 	*.tar.bz2*) \
+-	  bunzip2 -c $(distdir).tar.bz2 | $(am__untar) ;;\
++	  bzip2 -dc $(distdir).tar.bz2 | $(am__untar) ;;\
+ 	*.tar.lzma*) \
+-	  unlzma -c $(distdir).tar.lzma | $(am__untar) ;;\
++	  lzma -dc $(distdir).tar.lzma | $(am__untar) ;;\
+ 	*.tar.xz*) \
+ 	  xz -dc $(distdir).tar.xz | $(am__untar) ;;\
+ 	*.tar.Z*) \
+ 	  uncompress -c $(distdir).tar.Z | $(am__untar) ;;\
+ 	*.shar.gz*) \
+-	  GZIP=$(GZIP_ENV) gunzip -c $(distdir).shar.gz | unshar ;;\
++	  GZIP=$(GZIP_ENV) gzip -dc $(distdir).shar.gz | unshar ;;\
+ 	*.zip*) \
+ 	  unzip $(distdir).zip ;;\
+ 	esac
+@@ -492,21 +558,19 @@ distcleancheck: distclean
+ 	       $(distcleancheck_listfiles) ; \
+ 	       exit 1; } >&2
+ check-am: all-am
+-check: check-am
+-all-am: Makefile $(PROGRAMS) config.h
+-installdirs:
+-	for dir in "$(DESTDIR)$(bindir)"; do \
+-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+-	done
+-install: install-am
+-install-exec: install-exec-am
+-install-data: install-data-am
+-uninstall: uninstall-am
++check: check-recursive
++all-am: Makefile config.h
++installdirs: installdirs-recursive
++installdirs-am:
++install: install-recursive
++install-exec: install-exec-recursive
++install-data: install-data-recursive
++uninstall: uninstall-recursive
+ 
+ install-am: all-am
+ 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+ 
+-installcheck: installcheck-am
++installcheck: installcheck-recursive
+ install-strip:
+ 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+ 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+@@ -523,97 +587,93 @@ distclean-generic:
+ maintainer-clean-generic:
+ 	@echo "This command is intended for maintainers to use"
+ 	@echo "it deletes files that may require special tools to rebuild."
+-clean: clean-am
++clean: clean-recursive
+ 
+-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
++clean-am: clean-generic mostlyclean-am
+ 
+-distclean: distclean-am
++distclean: distclean-recursive
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+-	-rm -rf ./$(DEPDIR)
+ 	-rm -f Makefile
+-distclean-am: clean-am distclean-compile distclean-generic \
+-	distclean-hdr distclean-tags
++distclean-am: clean-am distclean-generic distclean-hdr distclean-tags
+ 
+-dvi: dvi-am
++dvi: dvi-recursive
+ 
+ dvi-am:
+ 
+-html: html-am
++html: html-recursive
+ 
+ html-am:
+ 
+-info: info-am
++info: info-recursive
+ 
+ info-am:
+ 
+ install-data-am:
+ 
+-install-dvi: install-dvi-am
++install-dvi: install-dvi-recursive
+ 
+ install-dvi-am:
+ 
+-install-exec-am: install-binPROGRAMS
++install-exec-am:
+ 
+-install-html: install-html-am
++install-html: install-html-recursive
+ 
+ install-html-am:
+ 
+-install-info: install-info-am
++install-info: install-info-recursive
+ 
+ install-info-am:
+ 
+ install-man:
+ 
+-install-pdf: install-pdf-am
++install-pdf: install-pdf-recursive
+ 
+ install-pdf-am:
+ 
+-install-ps: install-ps-am
++install-ps: install-ps-recursive
+ 
+ install-ps-am:
+ 
+ installcheck-am:
+ 
+-maintainer-clean: maintainer-clean-am
++maintainer-clean: maintainer-clean-recursive
+ 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+ 	-rm -rf $(top_srcdir)/autom4te.cache
+-	-rm -rf ./$(DEPDIR)
+ 	-rm -f Makefile
+ maintainer-clean-am: distclean-am maintainer-clean-generic
+ 
+-mostlyclean: mostlyclean-am
++mostlyclean: mostlyclean-recursive
+ 
+-mostlyclean-am: mostlyclean-compile mostlyclean-generic
++mostlyclean-am: mostlyclean-generic
+ 
+-pdf: pdf-am
++pdf: pdf-recursive
+ 
+ pdf-am:
+ 
+-ps: ps-am
++ps: ps-recursive
+ 
+ ps-am:
+ 
+-uninstall-am: uninstall-binPROGRAMS
++uninstall-am:
+ 
+-.MAKE: all install-am install-strip
++.MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) all \
++	ctags-recursive install-am install-strip tags-recursive
+ 
+-.PHONY: CTAGS GTAGS all all-am am--refresh check check-am clean \
+-	clean-binPROGRAMS clean-generic ctags dist dist-all dist-bzip2 \
+-	dist-gzip dist-lzma dist-shar dist-tarZ dist-xz dist-zip \
+-	distcheck distclean distclean-compile distclean-generic \
+-	distclean-hdr distclean-tags distcleancheck distdir \
+-	distuninstallcheck dvi dvi-am html html-am info info-am \
+-	install install-am install-binPROGRAMS install-data \
++.PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
++	all all-am am--refresh check check-am clean clean-generic \
++	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
++	dist-lzma dist-shar dist-tarZ dist-xz dist-zip distcheck \
++	distclean distclean-generic distclean-hdr distclean-tags \
++	distcleancheck distdir distuninstallcheck dvi dvi-am html \
++	html-am info info-am install install-am install-data \
+ 	install-data-am install-dvi install-dvi-am install-exec \
+ 	install-exec-am install-html install-html-am install-info \
+ 	install-info-am install-man install-pdf install-pdf-am \
+ 	install-ps install-ps-am install-strip installcheck \
+-	installcheck-am installdirs maintainer-clean \
+-	maintainer-clean-generic mostlyclean mostlyclean-compile \
+-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+-	uninstall-am uninstall-binPROGRAMS
++	installcheck-am installdirs installdirs-am maintainer-clean \
++	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
++	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am
+ 
+-#LIBS = $(libusb_LIBS) 
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/usbsoftrock.c
+@@ -0,0 +1,544 @@
++/***
++ * SoftRock USB I2C host control program
++ * Copyright (C) 2009 Andrew Nilsson (andrew.nilsson@gmail.com)
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ * 
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Based on powerSwitch.c by Christian Starkjohann,
++ * and usbtemp.c by Mathias Dalheimer
++ * of Objective Development Software GmbH (2005)
++ * (see http://www.obdev.at/avrusb)
++ */
++
++/*
++   General Description:
++   This program queries and controls the AVR Si570 hardware.
++   It must be linked with libusb, a library for accessing the USB bus from
++   Linux, FreeBSD, Mac OS X and other Unix operating systems. Libusb can be
++   obtained from http://libusb.sourceforge.net/.
++ */
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <math.h>
++#include <getopt.h>
++
++#ifdef HAVE_LIBNCURSES
++#include <ncurses.h>
++#endif
++
++/* Needed to compile on older FC3 systems */
++#if defined __linux
++#include <sys/types.h>
++#include <linux/limits.h>
++#endif
++
++#include <sys/socket.h>
++#include <netinet/in.h>
++#include <arpa/inet.h>
++
++#include <usb.h>    /* this is libusb, see http://libusb.sourceforge.net/ */
++
++#include "operations.h"
++#include "config_ops.h"
++#include "interactive.h"
++
++#define USBDEV_SHARED_VENDOR    0x16C0  /* VOTI */
++#define USBDEV_SHARED_PRODUCT   0x05DC  /* Obdev's free shared PID */
++/* Use obdev's generic shared VID/PID pair and follow the rules outlined
++ * in firmware/usbdrv/USBID-License.txt.
++ */
++
++// Number of attempts to complete an USB operation before giving up.
++#define USB_MAX_RETRIES		3
++
++double multiplier = 4;
++
++#define VENDOR_NAME			"www.obdev.at"
++#define PRODUCT_NAME			"DG8SAQ-I2C"
++
++extern char    serialNumberString[256];
++
++#define MAX_COMMAND_ARGS 3
++
++int verbose = 0;
++
++int i2cAddress = SI570_I2C_ADDR;
++double fXtall = SI570_NOMINAL_XTALL_FREQ;
++double startupFreq = SI570_DEFAULT_STARTUP_FREQ;
++
++int setByValue = 0;
++int PTT = 0;
++int keys = 0;		// paddle status 0 : none pressed    1:  dit pressed    2: dah pressed   3: both
++int firmware_PTT = 0;
++int CW_tone = 700;
++
++int major;
++int minor;
++
++static void usage(char *name)
++{
++  fprintf(stderr, "usbsoftrock %s\n", VERSION);
++  fprintf(stderr, "usage: %s [OPTION] COMMAND\n\n", name);
++  fprintf(stderr, "OPTION is one or more of\n");
++  fprintf(stderr, "  -a                             Advanced firmware present\n");
++  fprintf(stderr, "                                 i.e. let the firmware calculate registers\n");
++  fprintf(stderr, "  -d                             Enter a mode that listens for commands via UDP.\n");
++//  fprintf(stderr, "  -h <freq MHz>                  Enable subharmonic (/3) sampling from frequency (DEFAULT off)\n");
++  fprintf(stderr, "  -h                             PTT status by reading hardware port\n");
++  fprintf(stderr, "                                 Mobo only.\n");
++  fprintf(stderr, "  -i <address>                   I2C address in DECIMAL (DEFAULT = 85 (0x55))\n"); 
++  fprintf(stderr, "  -m <multiplier>                Multiplication factor for frequency (DEFAULT = 4)\n");
++  fprintf(stderr, "  -p <port num>                  Port to listen for UDP datagrams (DEFAULT = 19004)\n");
++  fprintf(stderr, "  -s <startup frequency MHz>     Factory programmed startup frequency (DEFAULT = 56.32)\n");
++  fprintf(stderr, "  -u <serial number>             Serial Number of Device\n");
++  fprintf(stderr, "  -v                             Verbose output (fairly useful)\n");
++  fprintf(stderr, "  -vv                            Even more verbose output (debugging)\n");
++  fprintf(stderr, "  -x <calibrated xtall freq MHz> Corrected XTALL frequency of Si570 device calculated\n");
++  fprintf(stderr, "                                 through the use of the calibrate command immediately\n");
++  fprintf(stderr, "                                 after startup.\n");
++  fprintf(stderr, "COMMAND is one of\n");
++  fprintf(stderr, "  calibrate (may require -s option)\n");
++  fprintf(stderr, "  getfreq\n");
++  fprintf(stderr, "  getregisters\n");
++#ifdef HAVE_LIBNCURSES
++  fprintf(stderr, "  interactive\n");
++#endif
++  fprintf(stderr, "  getptt                                 (-h option for Mobo only)\n");
++  fprintf(stderr, "  getkeys                                (PE0FKO+TF3LJ+Mobo)\n");
++  fprintf(stderr, "  gettone\n");
++  fprintf(stderr, "  ptt {on|off}\n");
++  fprintf(stderr, "  set bpf {on|off}                       (PE0FKO+TF3LJ+Mobo)\n");
++  fprintf(stderr, "  set bpf_addr <band> <filter>           (PE0FKO >= 15.12+Mobo)\n");
++  fprintf(stderr, "  set bpf_point <crossover> <f in MHz>   (PE0FKO+TF3LJ+Mobo)\n");
++  fprintf(stderr, "  set lpf {on|off}                       (TF3LJ+Mobo only)\n");
++  fprintf(stderr, "  set lpf_addr <band> <filter>                   \"     \n");
++  fprintf(stderr, "  set lpf_point <crossover> <f in MHz>           \"     \n");
++  fprintf(stderr, "  set freq <frequency in MHz>\n");
++  fprintf(stderr, "  set si570_addr <i2c address in decimal>\n");
++  fprintf(stderr, "  set si570_multiplier [band] <decimal factor>  (PE0FKO>=15.12+Mobo)\n");
++  fprintf(stderr, "  set startup <frequency in MHz>         (PE0FKO+TF3LJ+Mobo)\n");
++  fprintf(stderr, "  set xtall <frequency in MHz>           (PE0FKO+TF3LJ+Mobo)\n");
++  fprintf(stderr, "  status\n\n");
++  fprintf(stderr, "  where TF3LJ = Lofturs AtMega168 derivative\n");
++  fprintf(stderr, "        Mobo  = Mobo 4.3 Project AT90USB162 Firmware\n");
++}
++
++
++int do_command(usb_dev_handle *handle, char **argv, int argc, char *result) {
++
++  sprintf(result, "ok");
++
++  if (strcmp(argv[0], "get") == 0) {
++    if(argv[1][0] == 'p'){
++	if (firmware_PTT) PTT = getPTT(handle);	// this reads the PTT status from the connected Mobo
++        sprintf(result, "ok %d", PTT);
++	}
++    else if (argv[1][0] == 'k'){
++	keys = getkeys(handle);
++        sprintf(result, "ok %d", keys);
++	}
++    else if(argv[1][0] == 'f'){
++      double freq; 
++      if (setByValue)
++       freq = readFrequencyByValue(handle);
++      else
++        freq = getFrequency(handle);
++
++      if (freq != 0.00) {
++        if (verbose >= 2) printf("Frequency   : %f (x %.2f)\n", freq / multiplier, multiplier);
++        sprintf(result, "ok %f", freq / multiplier);
++      	} 
++      else
++	{
++        sprintf(result, "error");
++        return -1;
++        }
++      } 
++    else if(argv[1][0] == 't'){
++        sprintf(result, "ok %d", CW_tone);
++        }
++    else if (strcmp(argv[1], "si570_multiplier") == 0) {
++        double sub, mul;
++	// Just works for non per-band multipliers
++        if (readMultiplyLO(handle, 0, &mul, &sub) == 0)
++            sprintf(result, "ok %f", mul);
++        else {
++            sprintf(result, "error");
++	    return -1;
++	}
++    } 
++    else if (strcmp(argv[1], "local_multiplier") == 0) {
++        sprintf(result, "ok %f", multiplier);
++    } 
++    else {
++        sprintf(result, "error");
++	return -1;
++    } // end if "local multiplier"
++
++  } // end if "get"
++
++else if ((strcmp(argv[0], "set") == 0) && (argc >= 2)) {
++
++    if ((strcmp(argv[1], "ptt") == 0) && (argc >= 1)) {
++
++	PTT = (strncmp(argv[2],"on",2) == 0) ? 1 : 0;
++        setPTT(handle, PTT);
++      
++    } else if ((strcmp(argv[1], "bpf") == 0)) {
++
++	setBPF(handle, (strncmp(argv[2],"on",2) == 0) ? 1 : 0);
++
++    } else if (strcmp(argv[1], "freq") == 0) {
++
++      if (setByValue)
++        setFreqByValue(handle, atof(argv[2]));
++      else
++        setFrequency(handle, atof(argv[2]));
++    } else if (strcmp(argv[1], "tone") == 0) {
++        CW_tone = atof(argv[2]);
++      
++    } else if (strcmp(argv[1], "local_multiplier") == 0) {
++      multiplier = atof(argv[2]);
++    } else {
++      sprintf(result, "error");
++      return -1;
++    } 
++  } else {
++    sprintf(result, "error");
++    return -1;
++  }
++  
++  return 0;
++}
++
++
++
++/**
++ * Main routine. Parse commandline args and trigger actions.
++ */
++int main(int argc, char **argv) {
++  usb_dev_handle      *handle = NULL;
++  char * usbSerialID = NULL;
++  int c;
++
++// moved this malloc() here instead of within the while(1) loop
++// to prevent memory leakage problem
++// as *args is not free'ed.
++
++  char **args = malloc(MAX_COMMAND_ARGS * sizeof(char *));
++  int port = 19004;
++  int daemon = 0;
++
++  // Read options
++  while ( (c = getopt(argc, argv, "adhi:m:p:s:u:vx:")) != -1) {
++    switch (c) {
++    case 'i':
++      i2cAddress = atoi(optarg);
++      break;
++    case 'a':
++      setByValue = 1;
++      break;
++    case 'd':
++      daemon = 1;
++      break;
++    case 'h':
++      firmware_PTT = 1;
++      break;
++    case 'm':
++      multiplier = atof(optarg);
++      break;
++    case 'p': 
++      port = atoi(optarg);
++      break;
++    case 's':
++      startupFreq = atof(optarg);
++      break;
++    case 'x':
++      fXtall = atof(optarg);
++      break;
++    case 'u':
++      usbSerialID = optarg;
++      break;
++    case 'v':
++      verbose++;
++      break;
++    default: /* '?' */
++      usage(argv[0]);
++      exit(EXIT_FAILURE);
++    }
++  }
++  if (verbose) {
++    printf("I2C Address = %X\n", i2cAddress);
++    printf("fXtall = %f\n", fXtall);
++    printf("multiplier = %f\n", multiplier);
++    printf("startupFreq = %f\n", startupFreq);
++  }
++
++  if((argc <= optind) && (daemon == 0)){
++	usage(argv[0]);
++	exit(1);
++  }
++
++  usb_init();
++  char attempt=0, error=0;
++  do {
++	attempt++;
++	error=usbOpenDevice(&handle, USBDEV_SHARED_VENDOR, VENDOR_NAME, USBDEV_SHARED_PRODUCT, PRODUCT_NAME, usbSerialID);
++	if(error != 0){
++	  fprintf(stderr, "Could not open USB device \"%s\" with vid=0x%x pid=0x%x, retrying\n", PRODUCT_NAME, USBDEV_SHARED_VENDOR, USBDEV_SHARED_PRODUCT);
++	  sleep(2*attempt);
++	}
++  } while (error && attempt < USB_MAX_RETRIES);
++  if (error) {
++	fprintf(stderr, "Permanent problem opening usb device. Giving up.\n");
++	exit(1);
++  }
++
++  unsigned short version = readVersion(handle);
++  major = (version & 0xFF00) >> 8;
++  minor = (version & 0xFF);
++
++  /* Relocate lower later */
++  if (daemon) {
++    printf("Starting daemon...\n");
++
++    int socket_desc;
++
++    socket_desc=socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
++    if (socket_desc==-1)
++      perror("Create socket");
++
++    struct sockaddr_in address;
++    /* type of socket created in socket() */
++    address.sin_family = AF_INET;
++    address.sin_addr.s_addr = INADDR_ANY;
++    address.sin_port = htons(port);
++
++    /* bind the socket to the port specified above */
++    int retval;
++    if (bind(socket_desc,(struct sockaddr *)&address,sizeof(address)) != 0) {
++      fprintf(stderr, "Error binding to port %d\n", port);
++      exit(0); 
++    }
++
++    while (1) {
++      ssize_t bytes;
++      char buffer[1024];
++      struct sockaddr_in clnt;
++      socklen_t clnt_len;
++      clnt_len = sizeof(clnt);
++
++      bytes = recvfrom (socket_desc, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clnt, &clnt_len);
++      if (bytes > 0) {
++        buffer[bytes] = 0;
++        if (verbose >= 2)
++          printf("Returned %d bytes from %s: %s\n", bytes, inet_ntoa(clnt.sin_addr), buffer);
++
++        if (strncmp(buffer, "quit", 4) == 0) {
++          if (verbose)
++            printf("Quit command received\n");
++          exit(0);
++        }
++
++        char *saveptr;
++        char *token;
++        int argn = 0;
++
++        for (int i=0; i < MAX_COMMAND_ARGS;i++)
++          args[i] = NULL;
++
++        token = strtok_r(buffer, " ", &saveptr);
++        while (token != NULL) {
++          args[argn] = strcpy(malloc(strlen(token) + 1), token);
++          argn++;          
++          token = strtok_r(NULL, " ", &saveptr);
++        }
++
++        // Execute command here
++        char result[100];
++        do_command(handle, args, argn, result);
++
++        // Cleanup
++        for (int i=0; i < MAX_COMMAND_ARGS;i++) {
++          if (args[i] != NULL)
++            free(args[i]);
++        }
++
++        int retlen = strlen(result);
++        if (sendto(socket_desc, result, retlen,0, (struct sockaddr *) &clnt, clnt_len) != retlen) {
++          perror("Failed to send ack");
++          exit(1);
++        }
++
++      } else {
++      	fprintf(stderr, "recvfrom returned %d\n", bytes);
++      }
++    }
++
++    close(socket_desc);
++    exit(0);
++  }
++ 
++  /* Device has been opened - perform the requested operation */
++  if (strcmp(argv[optind], "getregisters") == 0) {
++
++	getRegisters(handle);
++
++  } else if(strcmp(argv[optind], "getfreq") == 0){
++	double freq; 
++	if (setByValue)
++		freq = readFrequencyByValue(handle);
++	else
++		freq = getFrequency(handle);
++
++	if (freq != 0.00)
++		printf("Frequency   : %f (x %.2f)\n", freq / multiplier, multiplier);
++
++#ifdef HAVE_LIBNCURSES
++  } else if (strcmp(argv[optind], "interactive") == 0) {
++      run_interactive(handle);
++#endif
++
++  } else if (strcmp(argv[optind], "getptt") == 0){
++	if (firmware_PTT) PTT = getPTT(handle);
++        printf("PTT   : %d\n", PTT);
++
++ } else if (strcmp(argv[optind], "getkeys") == 0){
++	keys = getkeys(handle);
++        printf("Paddles: %d\n", keys);
++
++ } else if (strcmp(argv[optind], "gettone") == 0){
++        printf("CW Tone: %d\n", CW_tone);
++
++  } else if ((strcmp(argv[optind], "ptt") == 0) && (argc >= optind + 1)) {
++
++	PTT = (strcmp(argv[optind+1],"on") == 0) ? 1: 0;
++	setPTT(handle, PTT);
++	printf("PTT set to %d\n", PTT);
++
++  } else if (strcmp(argv[optind], "calibrate") == 0) {
++	
++	calibrate(handle);
++
++  } else if ((strcmp(argv[optind], "set") == 0) && (argc >= optind + 2)) {
++
++    if ((strcmp(argv[optind+1], "bpf_addr") == 0) && (argc >= optind + 3)) {
++      // set bpf_addr index value
++      setBPFAddress(handle, atoi(argv[optind+2]), atoi(argv[optind+3]));
++      
++    } else if ((strcmp(argv[optind+1], "bpf_point") == 0) && (argc >= optind + 3)) {
++      // set bpf_point index (int) value (float)
++      setBPFCrossOver(handle, atoi(argv[optind+2]), atof(argv[optind+3]));
++      
++    } else if ((strcmp(argv[optind+1], "bpf") == 0) && (argc >= optind + 2)) {
++
++        setBPF(handle, (strcmp(argv[optind+2],"on") == 0) ? 1 : 0);
++
++    } else if ((strcmp(argv[optind+1], "lpf") == 0) && (argc >= optind + 2)) {
++
++        setLPF(handle, (strcmp(argv[optind+2],"on") == 0) ? 1 : 0);
++
++    } else if ((strcmp(argv[optind+1], "lpf_addr") == 0) && (argc >= optind + 3)) {
++      // set bpf_addr index value
++      setBPFAddress(handle, atoi(argv[optind+2]), atoi(argv[optind+3]));
++      displayLPFs(handle);
++      
++    } else if ((strcmp(argv[optind+1], "lpf_point") == 0) && (argc >= optind + 3)) {
++      // set lpf_point index (int) value (float)
++      setLPFCrossOver(handle, atoi(argv[optind+2]), atof(argv[optind+3]));
++            
++    } else if (strcmp(argv[optind+1], "freq") == 0) {
++
++      if (setByValue)
++        setFreqByValue(handle, atof(argv[optind+2]));
++      else
++        setFrequency(handle, atof(argv[optind+2]));
++      
++    } else if ((strcmp(argv[optind+1], "si570_addr") == 0) && (argc >= optind + 2)) {
++      
++      setSi570Address(handle, atoi(argv[optind+2]));
++      
++    } else if (strcmp(argv[optind+1], "si570_multiplier") == 0) {
++        
++	int index = 0;
++	int valueIndex = optind+2;
++	// If there are 2 args after the variable name, one is index
++	if (argc >= optind + 3) {
++	  index = atoi(argv[optind+2]);
++	  valueIndex++;
++	}
++	
++        double sub, mul;
++        readMultiplyLO(handle, index, &mul, &sub);
++        mul = atof(argv[valueIndex]);
++        setMultiplyLo(handle, index, mul, sub);
++        if (verbose)
++            printf("Set multiply [%d] to : %f\n", index, mul);
++        
++    } else if (strcmp(argv[optind+1], "xtall") == 0) {
++
++        setXtallFrequency(handle, atof(argv[optind+2]));
++
++    } else if (strcmp(argv[optind+1], "startup") == 0) {
++
++	setStartupFrequency(handle, atof(argv[optind+2]));
++
++    } else {
++	usage(argv[0]);
++	exit(1);
++    }
++
++  } else if (strcmp(argv[optind], "status") == 0) {
++
++	printf("USB SerialID: %s\n", serialNumberString);
++
++	if (major >= 15) {
++		readFrequencyByValue(handle);
++		readStartupFreq(handle);
++		readXtallFreq(handle);
++		readSmoothTunePPM(handle);
++		if (major >= 16 || minor >= 12) {
++			readSi570Address(handle);
++		}
++
++		displayBands(handle);
++		displayLPFs(handle);
++		
++		/*
++		if (major >= 16 || ((major >= 15) && (minor >= 12))) {
++		  displayBands(handle);
++		} else if (minor >= 10) {
++		  double sub, mul;
++		  readMultiplyLO(handle, 0, &mul, &sub);
++		  printf("LO Subtract : %f\n", sub);
++		  printf("Multiply    : %f\n", mul);
++		}
++		//displayBPFFilters(handle);
++		//displayLPFFilters(handle);*/
++	}
++  } else {
++	usage(argv[0]);
++	exit(1);
++  }
++  usb_close(handle);
++  return 0;
++}
++
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/operations.h
+@@ -0,0 +1,100 @@
++/***
++ * SoftRock USB I2C host control program
++ * Copyright (C) 2009 Andrew Nilsson (andrew.nilsson@gmail.com)
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ * 
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Based on powerSwitch.c by Christian Starkjohann,
++ * and usbtemp.c by Mathias Dalheimer
++ * of Objective Development Software GmbH (2005)
++ * (see http://www.obdev.at/avrusb)
++ */
++
++/*
++   General Description:
++   This program queries and controls the AVR Si570 hardware.
++   It must be linked with libusb, a library for accessing the USB bus from
++   Linux, FreeBSD, Mac OS X and other Unix operating systems. Libusb can be
++   obtained from http://libusb.sourceforge.net/.
++ */
++
++/* DG8SAQ specific values */
++#define SI570_I2C_ADDR 0x55
++#define SI570_DCO_HIGH 5670.0
++#define SI570_DCO_LOW 4850.0
++#define SI570_NOMINAL_XTALL_FREQ 114.285
++#define SI570_XTALL_DEVIATION_PPM 2000
++#define SI570_DEFAULT_STARTUP_FREQ	56.32
++
++#define REQUEST_READ_VERSION			0x00
++#define REQUEST_SET_DDRB			0x01
++#define REQUEST_SET_PORTB			0x04
++#define REQUEST_READ_EEPROM			0x11
++#define REQUEST_FILTERS				0x17
++#define REQUEST_SET_BPF_ADDRESS			0x18
++#define REQUEST_READ_BPF_ADDRESS		0x19
++#define REQUEST_SET_LPF_ADDRESS			0x1A
++#define REQUEST_READ_LPF_ADDRESS		0x1B
++#define REQUEST_SET_FREQ			0x30
++#define REQUEST_SET_MULTIPLY_LO     0x31
++#define REQUEST_SET_FREQ_BY_VALUE	0x32
++#define REQUEST_SET_XTALL_FREQ		0x33
++#define REQUEST_SET_STARTUP_FREQ	0x34
++#define REQUEST_READ_MULTIPLY_LO	0x39	
++#define REQUEST_READ_FREQUENCY		0x3A
++#define REQUEST_READ_SMOOTH_TUNE_PPM    0x3B
++#define REQUEST_READ_STARTUP		0x3C
++#define REQUEST_READ_XTALL		0x3D
++#define REQUEST_READ_REGISTERS		0x3F
++//#define REQUEST_SET_STARTUP_FREQ	0x41
++#define REQUEST_SET_PTT				0x50
++#define REQUEST_READ_KEYS			0x51
++#define REQUEST_READ_PCF8574			0x6f
++
++struct solution {
++	int HS_DIV;
++	int N1;
++	double f0;
++	double RFREQ;
++};
++
++unsigned char usbOpenDevice(usb_dev_handle **device, int vendor, char *vendorName, int product, char *productName, char *usbSerialID);
++
++void printBuffer(char * buffer, int length);
++
++void calibrate(usb_dev_handle *handle);
++
++double calculateFrequency(unsigned char * buffer);
++
++unsigned short readVersion(usb_dev_handle *handle);
++
++double readFrequencyByValue(usb_dev_handle *handle);
++
++void getRegisters(usb_dev_handle *handle);
++
++double getFrequency(usb_dev_handle *handle);
++
++int getPTT(usb_dev_handle *handle);
++
++int getkeys(usb_dev_handle *handle);
++
++void setPTT(usb_dev_handle *handle, int value);
++
++int calcDividers(double f, struct solution* solution);
++
++void setFrequency(usb_dev_handle * handle, double frequency);
++
++void setFreqByValue(usb_dev_handle * handle, double frequency);
++
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/config_ops.h
+@@ -0,0 +1,99 @@
++/***
++ * SoftRock USB I2C host control program
++ * Copyright (C) 2009 Andrew Nilsson (andrew.nilsson@gmail.com)
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ * 
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Based on powerSwitch.c by Christian Starkjohann,
++ * and usbtemp.c by Mathias Dalheimer
++ * of Objective Development Software GmbH (2005)
++ * (see http://www.obdev.at/avrusb)
++ */
++
++/*
++   General Description:
++   This program queries and controls the AVR Si570 hardware.
++   It must be linked with libusb, a library for accessing the USB bus from
++   Linux, FreeBSD, Mac OS X and other Unix operating systems. Libusb can be
++   obtained from http://libusb.sourceforge.net/.
++ */
++
++/* DG8SAQ specific values */
++#define SI570_I2C_ADDR 0x55
++#define SI570_DCO_HIGH 5670.0
++#define SI570_DCO_LOW 4850.0
++#define SI570_NOMINAL_XTALL_FREQ 114.285
++#define SI570_XTALL_DEVIATION_PPM 2000
++#define SI570_DEFAULT_STARTUP_FREQ	56.32
++
++#define REQUEST_READ_VERSION			0x00
++#define REQUEST_SET_DDRB			0x01
++#define REQUEST_SET_PORTB			0x04
++#define REQUEST_READ_EEPROM			0x11
++#define REQUEST_FILTERS				0x17
++#define REQUEST_SET_BPF_ADDRESS			0x18
++#define REQUEST_READ_BPF_ADDRESS		0x19
++#define REQUEST_SET_LPF_ADDRESS			0x1A
++#define REQUEST_READ_LPF_ADDRESS		0x1B
++#define REQUEST_SET_FREQ			0x30
++#define REQUEST_SET_MULTIPLY_LO     0x31
++#define REQUEST_SET_FREQ_BY_VALUE	0x32
++#define REQUEST_SET_XTALL_FREQ		0x33
++#define REQUEST_SET_STARTUP_FREQ	0x34
++#define REQUEST_READ_MULTIPLY_LO	0x39	
++#define REQUEST_READ_FREQUENCY		0x3A
++#define REQUEST_READ_SMOOTH_TUNE_PPM    0x3B
++#define REQUEST_READ_STARTUP		0x3C
++#define REQUEST_READ_XTALL		0x3D
++#define REQUEST_READ_REGISTERS		0x3F
++#define REQUEST_SET_SI570_ADDR	0x41
++#define REQUEST_SET_PTT				0x50
++#define REQUEST_READ_KEYS			0x51
++
++void calibrate(usb_dev_handle *handle);
++
++unsigned short readVersion(usb_dev_handle *handle);
++
++void readStartupFreq(usb_dev_handle *handle);
++void setStartupFrequency(usb_dev_handle *handle, double startupFreq);
++
++void readXtallFreq(usb_dev_handle *handle);
++void setXtallFrequency(usb_dev_handle *handle, double xtallFreq);
++
++void setSi570Address(usb_dev_handle *, unsigned char);
++short readSi570Address(usb_dev_handle *);
++
++int readMultiplyLO(usb_dev_handle *handle, int, double *, double *);
++void setMultiplyLo(usb_dev_handle *, int, double, double);
++
++void readSmoothTunePPM(usb_dev_handle *handle);
++
++
++// BPF+LPF Support
++int readFilters(usb_dev_handle *handle, int, unsigned short * ,int);
++int readBPFAddresses(usb_dev_handle *handle, unsigned char *);
++void setBPFAddress(usb_dev_handle *handle, int, int);
++void setBPFCrossOver(usb_dev_handle *handle, int, float);
++int readLPFAddresses(usb_dev_handle *handle, unsigned char *);
++void setLPFAddress(usb_dev_handle *handle, int, int);
++void setLPFCrossOver(usb_dev_handle *handle, int, float);
++void setBPF(usb_dev_handle *handle, int enable);
++void setLPF(usb_dev_handle *handle, int enable);
++
++void displayBands(usb_dev_handle *handle);
++void displayLPFs(usb_dev_handle *handle);
++
++//void displayBPFCrossovers(usb_dev_handle *handle);
++//void displayLPFCrossovers(usb_dev_handle *handle);
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/interactive.c
+@@ -0,0 +1,108 @@
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#ifdef HAVE_LIBNCURSES
++#include <ncurses.h>
++#endif
++
++/* Needed to compile on older FC3 systems */
++#if defined __linux
++#include <sys/types.h>
++#include <linux/limits.h>
++#endif
++
++#include <usb.h>    /* this is libusb, see http://libusb.sourceforge.net/ */
++
++#include "operations.h"
++#include "interactive.h"
++
++extern int setByValue;
++extern double multiplier;
++
++void run_interactive(usb_dev_handle *handle) {
++	char ch;
++	int row, col;
++
++	initscr();
++	getmaxyx(stdscr,row,col);
++	keypad(stdscr, TRUE);
++	cbreak();
++	noecho();
++
++	double currentFreq;
++	if (setByValue == 1)
++		currentFreq = readFrequencyByValue(handle);
++	else 
++		currentFreq = getFrequency(handle);
++	currentFreq = currentFreq / multiplier;
++
++	attron(A_BOLD);
++	mvprintw(1, 0, "%3.6f MHz", currentFreq);
++	attroff(A_BOLD);
++	mvprintw(3, 0, "q/a = Up/Down 100 KHz\n");
++	printw("w/s = Up/Down  10 KHz\n");
++	printw("e/d = Up/Down   1 KHz\n");
++	printw("r/f = Up/Down 100 Hz\n");
++	printw("t/g = Up/Down  10 Hz\n");
++	printw("x   = Exit");
++ 
++	refresh();
++
++	int ptt = 0;
++	
++	while ((ch = getch()) != 'x') {		
++		int inc = 0;
++		switch (ch) {
++		case 'q':
++			inc = 100000;
++			break;
++		case 'a':
++			inc = -100000;
++			break;
++		case 'w':
++			inc = 10000;
++			break;
++		case 's':
++			inc = -10000;
++			break;
++		case 'e': 
++			inc = 1000;
++			break;
++		case 'd':
++			inc = -1000;
++			break;
++		case 'r':
++			inc = 100;
++			break;
++		case 'f':
++			inc = -100;
++			break;
++		case 't':
++			inc = 10;
++			break;
++		case 'g':
++			inc = -10;
++			break;
++		case 'p':
++			ptt = ptt == 0 ? 1 : 0;
++			setPTT(handle, ptt);
++		default:
++			inc = 0;
++		}
++		currentFreq = currentFreq + inc / 1000000.0;
++
++		/* Now set the new freq */
++		if (setByValue)
++			setFreqByValue(handle, currentFreq);
++		else
++			setFrequency(handle, currentFreq);
++
++		attron(A_BOLD);
++		mvprintw(1, 0, "%3.6f MHz", currentFreq);
++		attroff(A_BOLD);
++		refresh();
++	}
++
++	endwin();
++}
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/Makefile.am
+@@ -0,0 +1,8 @@
++bin_PROGRAMS = usbsoftrock
++usbsoftrock_SOURCES = usbsoftrock.c operations.c operations.h config_ops.c config_ops.h \
++	interactive.c interactive.h
++usbsoftrock_LDADD = -lm
++
++INCLUDES = $(libusb_CFLAGS)
++#LIBS = $(libusb_LIBS) 
++
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/depcomp
+@@ -0,0 +1,589 @@
++#! /bin/sh
++# depcomp - compile a program generating dependencies as side-effects
++
++scriptversion=2007-03-29.01
++
++# Copyright (C) 1999, 2000, 2003, 2004, 2005, 2006, 2007 Free Software
++# Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 2, or (at your option)
++# any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
++# 02110-1301, USA.
++
++# As a special exception to the GNU General Public License, if you
++# distribute this file as part of a program that contains a
++# configuration script generated by Autoconf, you may include it under
++# the same distribution terms that you use for the rest of that program.
++
++# Originally written by Alexandre Oliva <oliva@dcc.unicamp.br>.
++
++case $1 in
++  '')
++     echo "$0: No command.  Try \`$0 --help' for more information." 1>&2
++     exit 1;
++     ;;
++  -h | --h*)
++    cat <<\EOF
++Usage: depcomp [--help] [--version] PROGRAM [ARGS]
++
++Run PROGRAMS ARGS to compile a file, generating dependencies
++as side-effects.
++
++Environment variables:
++  depmode     Dependency tracking mode.
++  source      Source file read by `PROGRAMS ARGS'.
++  object      Object file output by `PROGRAMS ARGS'.
++  DEPDIR      directory where to store dependencies.
++  depfile     Dependency file to output.
++  tmpdepfile  Temporary file to use when outputing dependencies.
++  libtool     Whether libtool is used (yes/no).
++
++Report bugs to <bug-automake@gnu.org>.
++EOF
++    exit $?
++    ;;
++  -v | --v*)
++    echo "depcomp $scriptversion"
++    exit $?
++    ;;
++esac
++
++if test -z "$depmode" || test -z "$source" || test -z "$object"; then
++  echo "depcomp: Variables source, object and depmode must be set" 1>&2
++  exit 1
++fi
++
++# Dependencies for sub/bar.o or sub/bar.obj go into sub/.deps/bar.Po.
++depfile=${depfile-`echo "$object" |
++  sed 's|[^\\/]*$|'${DEPDIR-.deps}'/&|;s|\.\([^.]*\)$|.P\1|;s|Pobj$|Po|'`}
++tmpdepfile=${tmpdepfile-`echo "$depfile" | sed 's/\.\([^.]*\)$/.T\1/'`}
++
++rm -f "$tmpdepfile"
++
++# Some modes work just like other modes, but use different flags.  We
++# parameterize here, but still list the modes in the big case below,
++# to make depend.m4 easier to write.  Note that we *cannot* use a case
++# here, because this file can only contain one case statement.
++if test "$depmode" = hp; then
++  # HP compiler uses -M and no extra arg.
++  gccflag=-M
++  depmode=gcc
++fi
++
++if test "$depmode" = dashXmstdout; then
++   # This is just like dashmstdout with a different argument.
++   dashmflag=-xM
++   depmode=dashmstdout
++fi
++
++case "$depmode" in
++gcc3)
++## gcc 3 implements dependency tracking that does exactly what
++## we want.  Yay!  Note: for some reason libtool 1.4 doesn't like
++## it if -MD -MP comes after the -MF stuff.  Hmm.
++## Unfortunately, FreeBSD c89 acceptance of flags depends upon
++## the command line argument order; so add the flags where they
++## appear in depend2.am.  Note that the slowdown incurred here
++## affects only configure: in makefiles, %FASTDEP% shortcuts this.
++  for arg
++  do
++    case $arg in
++    -c) set fnord "$@" -MT "$object" -MD -MP -MF "$tmpdepfile" "$arg" ;;
++    *)  set fnord "$@" "$arg" ;;
++    esac
++    shift # fnord
++    shift # $arg
++  done
++  "$@"
++  stat=$?
++  if test $stat -eq 0; then :
++  else
++    rm -f "$tmpdepfile"
++    exit $stat
++  fi
++  mv "$tmpdepfile" "$depfile"
++  ;;
++
++gcc)
++## There are various ways to get dependency output from gcc.  Here's
++## why we pick this rather obscure method:
++## - Don't want to use -MD because we'd like the dependencies to end
++##   up in a subdir.  Having to rename by hand is ugly.
++##   (We might end up doing this anyway to support other compilers.)
++## - The DEPENDENCIES_OUTPUT environment variable makes gcc act like
++##   -MM, not -M (despite what the docs say).
++## - Using -M directly means running the compiler twice (even worse
++##   than renaming).
++  if test -z "$gccflag"; then
++    gccflag=-MD,
++  fi
++  "$@" -Wp,"$gccflag$tmpdepfile"
++  stat=$?
++  if test $stat -eq 0; then :
++  else
++    rm -f "$tmpdepfile"
++    exit $stat
++  fi
++  rm -f "$depfile"
++  echo "$object : \\" > "$depfile"
++  alpha=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
++## The second -e expression handles DOS-style file names with drive letters.
++  sed -e 's/^[^:]*: / /' \
++      -e 's/^['$alpha']:\/[^:]*: / /' < "$tmpdepfile" >> "$depfile"
++## This next piece of magic avoids the `deleted header file' problem.
++## The problem is that when a header file which appears in a .P file
++## is deleted, the dependency causes make to die (because there is
++## typically no way to rebuild the header).  We avoid this by adding
++## dummy dependencies for each header file.  Too bad gcc doesn't do
++## this for us directly.
++  tr ' ' '
++' < "$tmpdepfile" |
++## Some versions of gcc put a space before the `:'.  On the theory
++## that the space means something, we add a space to the output as
++## well.
++## Some versions of the HPUX 10.20 sed can't process this invocation
++## correctly.  Breaking it into two sed invocations is a workaround.
++    sed -e 's/^\\$//' -e '/^$/d' -e '/:$/d' | sed -e 's/$/ :/' >> "$depfile"
++  rm -f "$tmpdepfile"
++  ;;
++
++hp)
++  # This case exists only to let depend.m4 do its work.  It works by
++  # looking at the text of this script.  This case will never be run,
++  # since it is checked for above.
++  exit 1
++  ;;
++
++sgi)
++  if test "$libtool" = yes; then
++    "$@" "-Wp,-MDupdate,$tmpdepfile"
++  else
++    "$@" -MDupdate "$tmpdepfile"
++  fi
++  stat=$?
++  if test $stat -eq 0; then :
++  else
++    rm -f "$tmpdepfile"
++    exit $stat
++  fi
++  rm -f "$depfile"
++
++  if test -f "$tmpdepfile"; then  # yes, the sourcefile depend on other files
++    echo "$object : \\" > "$depfile"
++
++    # Clip off the initial element (the dependent).  Don't try to be
++    # clever and replace this with sed code, as IRIX sed won't handle
++    # lines with more than a fixed number of characters (4096 in
++    # IRIX 6.2 sed, 8192 in IRIX 6.5).  We also remove comment lines;
++    # the IRIX cc adds comments like `#:fec' to the end of the
++    # dependency line.
++    tr ' ' '
++' < "$tmpdepfile" \
++    | sed -e 's/^.*\.o://' -e 's/#.*$//' -e '/^$/ d' | \
++    tr '
++' ' ' >> $depfile
++    echo >> $depfile
++
++    # The second pass generates a dummy entry for each header file.
++    tr ' ' '
++' < "$tmpdepfile" \
++   | sed -e 's/^.*\.o://' -e 's/#.*$//' -e '/^$/ d' -e 's/$/:/' \
++   >> $depfile
++  else
++    # The sourcefile does not contain any dependencies, so just
++    # store a dummy comment line, to avoid errors with the Makefile
++    # "include basename.Plo" scheme.
++    echo "#dummy" > "$depfile"
++  fi
++  rm -f "$tmpdepfile"
++  ;;
++
++aix)
++  # The C for AIX Compiler uses -M and outputs the dependencies
++  # in a .u file.  In older versions, this file always lives in the
++  # current directory.  Also, the AIX compiler puts `$object:' at the
++  # start of each line; $object doesn't have directory information.
++  # Version 6 uses the directory in both cases.
++  dir=`echo "$object" | sed -e 's|/[^/]*$|/|'`
++  test "x$dir" = "x$object" && dir=
++  base=`echo "$object" | sed -e 's|^.*/||' -e 's/\.o$//' -e 's/\.lo$//'`
++  if test "$libtool" = yes; then
++    tmpdepfile1=$dir$base.u
++    tmpdepfile2=$base.u
++    tmpdepfile3=$dir.libs/$base.u
++    "$@" -Wc,-M
++  else
++    tmpdepfile1=$dir$base.u
++    tmpdepfile2=$dir$base.u
++    tmpdepfile3=$dir$base.u
++    "$@" -M
++  fi
++  stat=$?
++
++  if test $stat -eq 0; then :
++  else
++    rm -f "$tmpdepfile1" "$tmpdepfile2" "$tmpdepfile3"
++    exit $stat
++  fi
++
++  for tmpdepfile in "$tmpdepfile1" "$tmpdepfile2" "$tmpdepfile3"
++  do
++    test -f "$tmpdepfile" && break
++  done
++  if test -f "$tmpdepfile"; then
++    # Each line is of the form `foo.o: dependent.h'.
++    # Do two passes, one to just change these to
++    # `$object: dependent.h' and one to simply `dependent.h:'.
++    sed -e "s,^.*\.[a-z]*:,$object:," < "$tmpdepfile" > "$depfile"
++    # That's a tab and a space in the [].
++    sed -e 's,^.*\.[a-z]*:[	 ]*,,' -e 's,$,:,' < "$tmpdepfile" >> "$depfile"
++  else
++    # The sourcefile does not contain any dependencies, so just
++    # store a dummy comment line, to avoid errors with the Makefile
++    # "include basename.Plo" scheme.
++    echo "#dummy" > "$depfile"
++  fi
++  rm -f "$tmpdepfile"
++  ;;
++
++icc)
++  # Intel's C compiler understands `-MD -MF file'.  However on
++  #    icc -MD -MF foo.d -c -o sub/foo.o sub/foo.c
++  # ICC 7.0 will fill foo.d with something like
++  #    foo.o: sub/foo.c
++  #    foo.o: sub/foo.h
++  # which is wrong.  We want:
++  #    sub/foo.o: sub/foo.c
++  #    sub/foo.o: sub/foo.h
++  #    sub/foo.c:
++  #    sub/foo.h:
++  # ICC 7.1 will output
++  #    foo.o: sub/foo.c sub/foo.h
++  # and will wrap long lines using \ :
++  #    foo.o: sub/foo.c ... \
++  #     sub/foo.h ... \
++  #     ...
++
++  "$@" -MD -MF "$tmpdepfile"
++  stat=$?
++  if test $stat -eq 0; then :
++  else
++    rm -f "$tmpdepfile"
++    exit $stat
++  fi
++  rm -f "$depfile"
++  # Each line is of the form `foo.o: dependent.h',
++  # or `foo.o: dep1.h dep2.h \', or ` dep3.h dep4.h \'.
++  # Do two passes, one to just change these to
++  # `$object: dependent.h' and one to simply `dependent.h:'.
++  sed "s,^[^:]*:,$object :," < "$tmpdepfile" > "$depfile"
++  # Some versions of the HPUX 10.20 sed can't process this invocation
++  # correctly.  Breaking it into two sed invocations is a workaround.
++  sed 's,^[^:]*: \(.*\)$,\1,;s/^\\$//;/^$/d;/:$/d' < "$tmpdepfile" |
++    sed -e 's/$/ :/' >> "$depfile"
++  rm -f "$tmpdepfile"
++  ;;
++
++hp2)
++  # The "hp" stanza above does not work with aCC (C++) and HP's ia64
++  # compilers, which have integrated preprocessors.  The correct option
++  # to use with these is +Maked; it writes dependencies to a file named
++  # 'foo.d', which lands next to the object file, wherever that
++  # happens to be.
++  # Much of this is similar to the tru64 case; see comments there.
++  dir=`echo "$object" | sed -e 's|/[^/]*$|/|'`
++  test "x$dir" = "x$object" && dir=
++  base=`echo "$object" | sed -e 's|^.*/||' -e 's/\.o$//' -e 's/\.lo$//'`
++  if test "$libtool" = yes; then
++    tmpdepfile1=$dir$base.d
++    tmpdepfile2=$dir.libs/$base.d
++    "$@" -Wc,+Maked
++  else
++    tmpdepfile1=$dir$base.d
++    tmpdepfile2=$dir$base.d
++    "$@" +Maked
++  fi
++  stat=$?
++  if test $stat -eq 0; then :
++  else
++     rm -f "$tmpdepfile1" "$tmpdepfile2"
++     exit $stat
++  fi
++
++  for tmpdepfile in "$tmpdepfile1" "$tmpdepfile2"
++  do
++    test -f "$tmpdepfile" && break
++  done
++  if test -f "$tmpdepfile"; then
++    sed -e "s,^.*\.[a-z]*:,$object:," "$tmpdepfile" > "$depfile"
++    # Add `dependent.h:' lines.
++    sed -ne '2,${; s/^ *//; s/ \\*$//; s/$/:/; p;}' "$tmpdepfile" >> "$depfile"
++  else
++    echo "#dummy" > "$depfile"
++  fi
++  rm -f "$tmpdepfile" "$tmpdepfile2"
++  ;;
++
++tru64)
++   # The Tru64 compiler uses -MD to generate dependencies as a side
++   # effect.  `cc -MD -o foo.o ...' puts the dependencies into `foo.o.d'.
++   # At least on Alpha/Redhat 6.1, Compaq CCC V6.2-504 seems to put
++   # dependencies in `foo.d' instead, so we check for that too.
++   # Subdirectories are respected.
++   dir=`echo "$object" | sed -e 's|/[^/]*$|/|'`
++   test "x$dir" = "x$object" && dir=
++   base=`echo "$object" | sed -e 's|^.*/||' -e 's/\.o$//' -e 's/\.lo$//'`
++
++   if test "$libtool" = yes; then
++      # With Tru64 cc, shared objects can also be used to make a
++      # static library.  This mechanism is used in libtool 1.4 series to
++      # handle both shared and static libraries in a single compilation.
++      # With libtool 1.4, dependencies were output in $dir.libs/$base.lo.d.
++      #
++      # With libtool 1.5 this exception was removed, and libtool now
++      # generates 2 separate objects for the 2 libraries.  These two
++      # compilations output dependencies in $dir.libs/$base.o.d and
++      # in $dir$base.o.d.  We have to check for both files, because
++      # one of the two compilations can be disabled.  We should prefer
++      # $dir$base.o.d over $dir.libs/$base.o.d because the latter is
++      # automatically cleaned when .libs/ is deleted, while ignoring
++      # the former would cause a distcleancheck panic.
++      tmpdepfile1=$dir.libs/$base.lo.d   # libtool 1.4
++      tmpdepfile2=$dir$base.o.d          # libtool 1.5
++      tmpdepfile3=$dir.libs/$base.o.d    # libtool 1.5
++      tmpdepfile4=$dir.libs/$base.d      # Compaq CCC V6.2-504
++      "$@" -Wc,-MD
++   else
++      tmpdepfile1=$dir$base.o.d
++      tmpdepfile2=$dir$base.d
++      tmpdepfile3=$dir$base.d
++      tmpdepfile4=$dir$base.d
++      "$@" -MD
++   fi
++
++   stat=$?
++   if test $stat -eq 0; then :
++   else
++      rm -f "$tmpdepfile1" "$tmpdepfile2" "$tmpdepfile3" "$tmpdepfile4"
++      exit $stat
++   fi
++
++   for tmpdepfile in "$tmpdepfile1" "$tmpdepfile2" "$tmpdepfile3" "$tmpdepfile4"
++   do
++     test -f "$tmpdepfile" && break
++   done
++   if test -f "$tmpdepfile"; then
++      sed -e "s,^.*\.[a-z]*:,$object:," < "$tmpdepfile" > "$depfile"
++      # That's a tab and a space in the [].
++      sed -e 's,^.*\.[a-z]*:[	 ]*,,' -e 's,$,:,' < "$tmpdepfile" >> "$depfile"
++   else
++      echo "#dummy" > "$depfile"
++   fi
++   rm -f "$tmpdepfile"
++   ;;
++
++#nosideeffect)
++  # This comment above is used by automake to tell side-effect
++  # dependency tracking mechanisms from slower ones.
++
++dashmstdout)
++  # Important note: in order to support this mode, a compiler *must*
++  # always write the preprocessed file to stdout, regardless of -o.
++  "$@" || exit $?
++
++  # Remove the call to Libtool.
++  if test "$libtool" = yes; then
++    while test $1 != '--mode=compile'; do
++      shift
++    done
++    shift
++  fi
++
++  # Remove `-o $object'.
++  IFS=" "
++  for arg
++  do
++    case $arg in
++    -o)
++      shift
++      ;;
++    $object)
++      shift
++      ;;
++    *)
++      set fnord "$@" "$arg"
++      shift # fnord
++      shift # $arg
++      ;;
++    esac
++  done
++
++  test -z "$dashmflag" && dashmflag=-M
++  # Require at least two characters before searching for `:'
++  # in the target name.  This is to cope with DOS-style filenames:
++  # a dependency such as `c:/foo/bar' could be seen as target `c' otherwise.
++  "$@" $dashmflag |
++    sed 's:^[  ]*[^: ][^:][^:]*\:[    ]*:'"$object"'\: :' > "$tmpdepfile"
++  rm -f "$depfile"
++  cat < "$tmpdepfile" > "$depfile"
++  tr ' ' '
++' < "$tmpdepfile" | \
++## Some versions of the HPUX 10.20 sed can't process this invocation
++## correctly.  Breaking it into two sed invocations is a workaround.
++    sed -e 's/^\\$//' -e '/^$/d' -e '/:$/d' | sed -e 's/$/ :/' >> "$depfile"
++  rm -f "$tmpdepfile"
++  ;;
++
++dashXmstdout)
++  # This case only exists to satisfy depend.m4.  It is never actually
++  # run, as this mode is specially recognized in the preamble.
++  exit 1
++  ;;
++
++makedepend)
++  "$@" || exit $?
++  # Remove any Libtool call
++  if test "$libtool" = yes; then
++    while test $1 != '--mode=compile'; do
++      shift
++    done
++    shift
++  fi
++  # X makedepend
++  shift
++  cleared=no
++  for arg in "$@"; do
++    case $cleared in
++    no)
++      set ""; shift
++      cleared=yes ;;
++    esac
++    case "$arg" in
++    -D*|-I*)
++      set fnord "$@" "$arg"; shift ;;
++    # Strip any option that makedepend may not understand.  Remove
++    # the object too, otherwise makedepend will parse it as a source file.
++    -*|$object)
++      ;;
++    *)
++      set fnord "$@" "$arg"; shift ;;
++    esac
++  done
++  obj_suffix="`echo $object | sed 's/^.*\././'`"
++  touch "$tmpdepfile"
++  ${MAKEDEPEND-makedepend} -o"$obj_suffix" -f"$tmpdepfile" "$@"
++  rm -f "$depfile"
++  cat < "$tmpdepfile" > "$depfile"
++  sed '1,2d' "$tmpdepfile" | tr ' ' '
++' | \
++## Some versions of the HPUX 10.20 sed can't process this invocation
++## correctly.  Breaking it into two sed invocations is a workaround.
++    sed -e 's/^\\$//' -e '/^$/d' -e '/:$/d' | sed -e 's/$/ :/' >> "$depfile"
++  rm -f "$tmpdepfile" "$tmpdepfile".bak
++  ;;
++
++cpp)
++  # Important note: in order to support this mode, a compiler *must*
++  # always write the preprocessed file to stdout.
++  "$@" || exit $?
++
++  # Remove the call to Libtool.
++  if test "$libtool" = yes; then
++    while test $1 != '--mode=compile'; do
++      shift
++    done
++    shift
++  fi
++
++  # Remove `-o $object'.
++  IFS=" "
++  for arg
++  do
++    case $arg in
++    -o)
++      shift
++      ;;
++    $object)
++      shift
++      ;;
++    *)
++      set fnord "$@" "$arg"
++      shift # fnord
++      shift # $arg
++      ;;
++    esac
++  done
++
++  "$@" -E |
++    sed -n -e '/^# [0-9][0-9]* "\([^"]*\)".*/ s:: \1 \\:p' \
++       -e '/^#line [0-9][0-9]* "\([^"]*\)".*/ s:: \1 \\:p' |
++    sed '$ s: \\$::' > "$tmpdepfile"
++  rm -f "$depfile"
++  echo "$object : \\" > "$depfile"
++  cat < "$tmpdepfile" >> "$depfile"
++  sed < "$tmpdepfile" '/^$/d;s/^ //;s/ \\$//;s/$/ :/' >> "$depfile"
++  rm -f "$tmpdepfile"
++  ;;
++
++msvisualcpp)
++  # Important note: in order to support this mode, a compiler *must*
++  # always write the preprocessed file to stdout, regardless of -o,
++  # because we must use -o when running libtool.
++  "$@" || exit $?
++  IFS=" "
++  for arg
++  do
++    case "$arg" in
++    "-Gm"|"/Gm"|"-Gi"|"/Gi"|"-ZI"|"/ZI")
++	set fnord "$@"
++	shift
++	shift
++	;;
++    *)
++	set fnord "$@" "$arg"
++	shift
++	shift
++	;;
++    esac
++  done
++  "$@" -E |
++  sed -n '/^#line [0-9][0-9]* "\([^"]*\)"/ s::echo "`cygpath -u \\"\1\\"`":p' | sort | uniq > "$tmpdepfile"
++  rm -f "$depfile"
++  echo "$object : \\" > "$depfile"
++  . "$tmpdepfile" | sed 's% %\\ %g' | sed -n '/^\(.*\)$/ s::	\1 \\:p' >> "$depfile"
++  echo "	" >> "$depfile"
++  . "$tmpdepfile" | sed 's% %\\ %g' | sed -n '/^\(.*\)$/ s::\1\::p' >> "$depfile"
++  rm -f "$tmpdepfile"
++  ;;
++
++none)
++  exec "$@"
++  ;;
++
++*)
++  echo "Unknown depmode $depmode" 1>&2
++  exit 1
++  ;;
++esac
++
++exit 0
++
++# Local Variables:
++# mode: shell-script
++# sh-indentation: 2
++# eval: (add-hook 'write-file-hooks 'time-stamp)
++# time-stamp-start: "scriptversion="
++# time-stamp-format: "%:y-%02m-%02d.%02H"
++# time-stamp-end: "$"
++# End:
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/interactive.h
+@@ -0,0 +1,2 @@
++
++void run_interactive(usb_dev_handle *handle);
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/Makefile.in
+@@ -0,0 +1,463 @@
++# Makefile.in generated by automake 1.11.1 from Makefile.am.
++# @configure_input@
++
++# Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
++# 2003, 2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation,
++# Inc.
++# This Makefile.in is free software; the Free Software Foundation
++# gives unlimited permission to copy and/or distribute it,
++# with or without modifications, as long as this notice is preserved.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
++# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
++# PARTICULAR PURPOSE.
++
++@SET_MAKE@
++
++VPATH = @srcdir@
++pkgdatadir = $(datadir)/@PACKAGE@
++pkgincludedir = $(includedir)/@PACKAGE@
++pkglibdir = $(libdir)/@PACKAGE@
++pkglibexecdir = $(libexecdir)/@PACKAGE@
++am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
++install_sh_DATA = $(install_sh) -c -m 644
++install_sh_PROGRAM = $(install_sh) -c
++install_sh_SCRIPT = $(install_sh) -c
++INSTALL_HEADER = $(INSTALL_DATA)
++transform = $(program_transform_name)
++NORMAL_INSTALL = :
++PRE_INSTALL = :
++POST_INSTALL = :
++NORMAL_UNINSTALL = :
++PRE_UNINSTALL = :
++POST_UNINSTALL = :
++bin_PROGRAMS = usbsoftrock$(EXEEXT)
++subdir = src
++DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in depcomp
++ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
++am__aclocal_m4_deps = $(top_srcdir)/configure.ac
++am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
++	$(ACLOCAL_M4)
++mkinstalldirs = $(install_sh) -d
++CONFIG_HEADER = $(top_builddir)/config.h
++CONFIG_CLEAN_FILES =
++CONFIG_CLEAN_VPATH_FILES =
++am__installdirs = "$(DESTDIR)$(bindir)"
++PROGRAMS = $(bin_PROGRAMS)
++am_usbsoftrock_OBJECTS = usbsoftrock.$(OBJEXT) operations.$(OBJEXT) \
++	config_ops.$(OBJEXT) interactive.$(OBJEXT)
++usbsoftrock_OBJECTS = $(am_usbsoftrock_OBJECTS)
++usbsoftrock_DEPENDENCIES =
++DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
++depcomp = $(SHELL) $(top_srcdir)/depcomp
++am__depfiles_maybe = depfiles
++am__mv = mv -f
++COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
++	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
++CCLD = $(CC)
++LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
++SOURCES = $(usbsoftrock_SOURCES)
++DIST_SOURCES = $(usbsoftrock_SOURCES)
++ETAGS = etags
++CTAGS = ctags
++DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
++ACLOCAL = @ACLOCAL@
++AMTAR = @AMTAR@
++AUTOCONF = @AUTOCONF@
++AUTOHEADER = @AUTOHEADER@
++AUTOMAKE = @AUTOMAKE@
++AWK = @AWK@
++CC = @CC@
++CCDEPMODE = @CCDEPMODE@
++CFLAGS = @CFLAGS@
++CPP = @CPP@
++CPPFLAGS = @CPPFLAGS@
++CYGPATH_W = @CYGPATH_W@
++DEFS = @DEFS@
++DEPDIR = @DEPDIR@
++ECHO_C = @ECHO_C@
++ECHO_N = @ECHO_N@
++ECHO_T = @ECHO_T@
++EGREP = @EGREP@
++EXEEXT = @EXEEXT@
++GREP = @GREP@
++INSTALL = @INSTALL@
++INSTALL_DATA = @INSTALL_DATA@
++INSTALL_PROGRAM = @INSTALL_PROGRAM@
++INSTALL_SCRIPT = @INSTALL_SCRIPT@
++INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
++LDFLAGS = @LDFLAGS@
++LIBOBJS = @LIBOBJS@
++LIBS = @LIBS@
++LTLIBOBJS = @LTLIBOBJS@
++MAKEINFO = @MAKEINFO@
++MKDIR_P = @MKDIR_P@
++OBJEXT = @OBJEXT@
++PACKAGE = @PACKAGE@
++PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
++PACKAGE_NAME = @PACKAGE_NAME@
++PACKAGE_STRING = @PACKAGE_STRING@
++PACKAGE_TARNAME = @PACKAGE_TARNAME@
++PACKAGE_URL = @PACKAGE_URL@
++PACKAGE_VERSION = @PACKAGE_VERSION@
++PATH_SEPARATOR = @PATH_SEPARATOR@
++PKG_CONFIG = @PKG_CONFIG@
++PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
++PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
++SET_MAKE = @SET_MAKE@
++SHELL = @SHELL@
++STRIP = @STRIP@
++VERSION = @VERSION@
++abs_builddir = @abs_builddir@
++abs_srcdir = @abs_srcdir@
++abs_top_builddir = @abs_top_builddir@
++abs_top_srcdir = @abs_top_srcdir@
++ac_ct_CC = @ac_ct_CC@
++am__include = @am__include@
++am__leading_dot = @am__leading_dot@
++am__quote = @am__quote@
++am__tar = @am__tar@
++am__untar = @am__untar@
++bindir = @bindir@
++build_alias = @build_alias@
++builddir = @builddir@
++datadir = @datadir@
++datarootdir = @datarootdir@
++docdir = @docdir@
++dvidir = @dvidir@
++exec_prefix = @exec_prefix@
++host_alias = @host_alias@
++htmldir = @htmldir@
++includedir = @includedir@
++infodir = @infodir@
++install_sh = @install_sh@
++libdir = @libdir@
++libexecdir = @libexecdir@
++libusb_CFLAGS = @libusb_CFLAGS@
++libusb_LIBS = @libusb_LIBS@
++localedir = @localedir@
++localstatedir = @localstatedir@
++mandir = @mandir@
++mkdir_p = @mkdir_p@
++oldincludedir = @oldincludedir@
++pdfdir = @pdfdir@
++prefix = @prefix@
++program_transform_name = @program_transform_name@
++psdir = @psdir@
++sbindir = @sbindir@
++sharedstatedir = @sharedstatedir@
++srcdir = @srcdir@
++sysconfdir = @sysconfdir@
++target_alias = @target_alias@
++top_build_prefix = @top_build_prefix@
++top_builddir = @top_builddir@
++top_srcdir = @top_srcdir@
++usbsoftrock_SOURCES = usbsoftrock.c operations.c operations.h config_ops.c config_ops.h \
++	interactive.c interactive.h
++
++usbsoftrock_LDADD = -lm
++INCLUDES = $(libusb_CFLAGS)
++all: all-am
++
++.SUFFIXES:
++.SUFFIXES: .c .o .obj
++$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
++	@for dep in $?; do \
++	  case '$(am__configure_deps)' in \
++	    *$$dep*) \
++	      ( cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh ) \
++	        && { if test -f $@; then exit 0; else break; fi; }; \
++	      exit 1;; \
++	  esac; \
++	done; \
++	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
++	$(am__cd) $(top_srcdir) && \
++	  $(AUTOMAKE) --gnu src/Makefile
++.PRECIOUS: Makefile
++Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
++	@case '$?' in \
++	  *config.status*) \
++	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
++	  *) \
++	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
++	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
++	esac;
++
++$(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
++	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
++
++$(top_srcdir)/configure:  $(am__configure_deps)
++	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
++$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
++	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
++$(am__aclocal_m4_deps):
++install-binPROGRAMS: $(bin_PROGRAMS)
++	@$(NORMAL_INSTALL)
++	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
++	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
++	for p in $$list; do echo "$$p $$p"; done | \
++	sed 's/$(EXEEXT)$$//' | \
++	while read p p1; do if test -f $$p; \
++	  then echo "$$p"; echo "$$p"; else :; fi; \
++	done | \
++	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
++	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
++	sed 'N;N;N;s,\n, ,g' | \
++	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
++	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
++	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
++	    else { print "f", $$3 "/" $$4, $$1; } } \
++	  END { for (d in files) print "f", d, files[d] }' | \
++	while read type dir files; do \
++	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
++	    test -z "$$files" || { \
++	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
++	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
++	    } \
++	; done
++
++uninstall-binPROGRAMS:
++	@$(NORMAL_UNINSTALL)
++	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
++	files=`for p in $$list; do echo "$$p"; done | \
++	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
++	      -e 's/$$/$(EXEEXT)/' `; \
++	test -n "$$list" || exit 0; \
++	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
++	cd "$(DESTDIR)$(bindir)" && rm -f $$files
++
++clean-binPROGRAMS:
++	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
++usbsoftrock$(EXEEXT): $(usbsoftrock_OBJECTS) $(usbsoftrock_DEPENDENCIES) 
++	@rm -f usbsoftrock$(EXEEXT)
++	$(LINK) $(usbsoftrock_OBJECTS) $(usbsoftrock_LDADD) $(LIBS)
++
++mostlyclean-compile:
++	-rm -f *.$(OBJEXT)
++
++distclean-compile:
++	-rm -f *.tab.c
++
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config_ops.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interactive.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/operations.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usbsoftrock.Po@am__quote@
++
++.c.o:
++@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
++@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
++@am__fastdepCC_FALSE@	$(COMPILE) -c $<
++
++.c.obj:
++@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
++@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
++@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
++
++ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
++	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
++	unique=`for i in $$list; do \
++	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
++	  done | \
++	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
++	      END { if (nonempty) { for (i in files) print i; }; }'`; \
++	mkid -fID $$unique
++tags: TAGS
++
++TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
++		$(TAGS_FILES) $(LISP)
++	set x; \
++	here=`pwd`; \
++	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
++	unique=`for i in $$list; do \
++	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
++	  done | \
++	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
++	      END { if (nonempty) { for (i in files) print i; }; }'`; \
++	shift; \
++	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
++	  test -n "$$unique" || unique=$$empty_fix; \
++	  if test $$# -gt 0; then \
++	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
++	      "$$@" $$unique; \
++	  else \
++	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
++	      $$unique; \
++	  fi; \
++	fi
++ctags: CTAGS
++CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
++		$(TAGS_FILES) $(LISP)
++	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
++	unique=`for i in $$list; do \
++	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
++	  done | \
++	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
++	      END { if (nonempty) { for (i in files) print i; }; }'`; \
++	test -z "$(CTAGS_ARGS)$$unique" \
++	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
++	     $$unique
++
++GTAGS:
++	here=`$(am__cd) $(top_builddir) && pwd` \
++	  && $(am__cd) $(top_srcdir) \
++	  && gtags -i $(GTAGS_ARGS) "$$here"
++
++distclean-tags:
++	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
++
++distdir: $(DISTFILES)
++	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
++	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
++	list='$(DISTFILES)'; \
++	  dist_files=`for file in $$list; do echo $$file; done | \
++	  sed -e "s|^$$srcdirstrip/||;t" \
++	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
++	case $$dist_files in \
++	  */*) $(MKDIR_P) `echo "$$dist_files" | \
++			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
++			   sort -u` ;; \
++	esac; \
++	for file in $$dist_files; do \
++	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
++	  if test -d $$d/$$file; then \
++	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
++	    if test -d "$(distdir)/$$file"; then \
++	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
++	    fi; \
++	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
++	      cp -fpR $(srcdir)/$$file "$(distdir)$$dir" || exit 1; \
++	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
++	    fi; \
++	    cp -fpR $$d/$$file "$(distdir)$$dir" || exit 1; \
++	  else \
++	    test -f "$(distdir)/$$file" \
++	    || cp -p $$d/$$file "$(distdir)/$$file" \
++	    || exit 1; \
++	  fi; \
++	done
++check-am: all-am
++check: check-am
++all-am: Makefile $(PROGRAMS)
++installdirs:
++	for dir in "$(DESTDIR)$(bindir)"; do \
++	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
++	done
++install: install-am
++install-exec: install-exec-am
++install-data: install-data-am
++uninstall: uninstall-am
++
++install-am: all-am
++	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
++
++installcheck: installcheck-am
++install-strip:
++	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
++	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
++	  `test -z '$(STRIP)' || \
++	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
++mostlyclean-generic:
++
++clean-generic:
++
++distclean-generic:
++	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
++	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
++
++maintainer-clean-generic:
++	@echo "This command is intended for maintainers to use"
++	@echo "it deletes files that may require special tools to rebuild."
++clean: clean-am
++
++clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
++
++distclean: distclean-am
++	-rm -rf ./$(DEPDIR)
++	-rm -f Makefile
++distclean-am: clean-am distclean-compile distclean-generic \
++	distclean-tags
++
++dvi: dvi-am
++
++dvi-am:
++
++html: html-am
++
++html-am:
++
++info: info-am
++
++info-am:
++
++install-data-am:
++
++install-dvi: install-dvi-am
++
++install-dvi-am:
++
++install-exec-am: install-binPROGRAMS
++
++install-html: install-html-am
++
++install-html-am:
++
++install-info: install-info-am
++
++install-info-am:
++
++install-man:
++
++install-pdf: install-pdf-am
++
++install-pdf-am:
++
++install-ps: install-ps-am
++
++install-ps-am:
++
++installcheck-am:
++
++maintainer-clean: maintainer-clean-am
++	-rm -rf ./$(DEPDIR)
++	-rm -f Makefile
++maintainer-clean-am: distclean-am maintainer-clean-generic
++
++mostlyclean: mostlyclean-am
++
++mostlyclean-am: mostlyclean-compile mostlyclean-generic
++
++pdf: pdf-am
++
++pdf-am:
++
++ps: ps-am
++
++ps-am:
++
++uninstall-am: uninstall-binPROGRAMS
++
++.MAKE: install-am install-strip
++
++.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
++	clean-generic ctags distclean distclean-compile \
++	distclean-generic distclean-tags distdir dvi dvi-am html \
++	html-am info info-am install install-am install-binPROGRAMS \
++	install-data install-data-am install-dvi install-dvi-am \
++	install-exec install-exec-am install-html install-html-am \
++	install-info install-info-am install-man install-pdf \
++	install-pdf-am install-ps install-ps-am install-strip \
++	installcheck installcheck-am installdirs maintainer-clean \
++	maintainer-clean-generic mostlyclean mostlyclean-compile \
++	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
++	uninstall-am uninstall-binPROGRAMS
++
++#LIBS = $(libusb_LIBS) 
++
++# Tell versions [3.59,3.63) of GNU make to not export all variables.
++# Otherwise a system limit (for SysV at least) may be exceeded.
++.NOEXPORT:
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/config_ops.c
+@@ -0,0 +1,508 @@
++/***
++ * SoftRock USB I2C host control program
++ * Copyright (C) 2009 Andrew Nilsson (andrew.nilsson@gmail.com)
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ * 
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Based on powerSwitch.c by Christian Starkjohann,
++ * and usbtemp.c by Mathias Dalheimer
++ * of Objective Development Software GmbH (2005)
++ * (see http://www.obdev.at/avrusb)
++ */
++
++/*
++   General Description:
++   This program queries and controls the AVR Si570 hardware.
++   It must be linked with libusb, a library for accessing the USB bus from
++   Linux, FreeBSD, Mac OS X and other Unix operating systems. Libusb can be
++   obtained from http://libusb.sourceforge.net/.
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <math.h>
++
++/* Needed to compile on older FC3 systems */
++#if defined __linux
++#include <sys/types.h>
++#include <linux/limits.h>
++#endif
++
++#include <usb.h>    /* this is libusb, see http://libusb.sourceforge.net/ */
++
++#include "operations.h"
++#include "config_ops.h"
++
++#ifndef TRUE
++#define TRUE 1
++#endif
++
++#ifndef FALSE
++#define FALSE 0
++#endif
++
++extern int verbose;
++
++extern int major;
++extern int minor;
++
++extern int i2cAddress;
++extern double fXtall;
++extern double startupFreq;
++extern double multiplier;
++extern double subHarmonicStart;
++
++void displayBPFTable(usb_dev_handle *handle, unsigned short *FilterCrossOver, int nFilters);
++void displayLPFtable(usb_dev_handle *handle, unsigned short *FilterCrossOver, int length);
++
++
++void calibrate(usb_dev_handle *handle)
++{
++	char buffer[6];
++	int request = REQUEST_READ_REGISTERS;
++	int value = SI570_I2C_ADDR;
++	int index = 0;
++	int retVal;
++        
++	
++	// Si570 RECALL function
++	char i2cError;
++    	retVal = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 0x20, SI570_I2C_ADDR | (135<<8), 0x01, &i2cError, 1, 500);
++	if (retVal != 1 || i2cError != 0) {
++		fprintf(stderr, "Failed reseting to factory frequency\n");
++	}
++
++	// send message to USB device
++	if (usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, request, value, index, buffer, 6, 500)) 
++	{	
++
++		int RFREQ_int = ((buffer[2] & 0xf0) >> 4) + ((buffer[1] & 0x3f) * 16);
++		int RFREQ_frac = (256 * 256 * 256 * (buffer[2] & 0xf)) + (256 * 256 * buffer[3]) + (256 * buffer[4]) + (buffer[5]);
++		double RFREQ = RFREQ_int + (RFREQ_frac / 268435456.0);
++		
++		int N1 = ((buffer[1] & 0xc0 ) >> 6) + ((buffer[0] & 0x1f) * 4);
++		
++		int HS_DIV = (buffer[0] & 0xE0) >> 5;
++		int HS_DIV_MAP[] = {4,5,6,7,-1,9,-1,11}; 
++		
++		if (verbose){
++			printf("RFREQ = %f\n", RFREQ);
++			printf("N1 = %d\n", N1);
++			printf("HS_DIV = %d, HS_DIV_MAP[%d] = %d\n", HS_DIV, HS_DIV, HS_DIV_MAP[HS_DIV]);
++		}
++		// Validate the calibration result before saving it
++		// DEFAULT_XTALL
++		double newXtallFreq = (startupFreq * (N1 +1) * HS_DIV_MAP[HS_DIV]) / RFREQ;
++		
++		if ((1000000.0 * fabs(newXtallFreq - SI570_NOMINAL_XTALL_FREQ) / SI570_NOMINAL_XTALL_FREQ) <= SI570_XTALL_DEVIATION_PPM) {
++			printf("fXTALL = %f\n", newXtallFreq);
++		} else {
++			fprintf(stderr, "Calibration Failed: The calculated crystal reference is outside of the spec for the Si570 device. The most likely possibility is that since power own, the Si570 has been shifted from the factory default frequency.\n");
++		}
++	} else {
++		fprintf(stderr, "Error communicating with USB device\n");
++	}
++}
++
++void readStartupFreq(usb_dev_handle *handle) {
++	unsigned int iFreq;
++	int nBytes;
++	
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_STARTUP, 0, 0, (char *) &iFreq, sizeof(iFreq), 500);
++
++	if (nBytes == 4) {
++		double dFreq;		
++        	dFreq = (double)iFreq / (1UL<<21);
++		printf("Startup Freq: %f (x %.2f)\n", dFreq / multiplier, multiplier);
++	}
++}
++
++void readXtallFreq(usb_dev_handle *handle) {
++	unsigned int iFreq;
++	int nBytes;
++	
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_XTALL, 0, 0, (char *) &iFreq, sizeof(iFreq), 500);
++
++	if (nBytes == 4) {
++		double dFreq;		
++        	dFreq = (double)iFreq / (1UL<<24);
++		printf("Xtall Freq  : %f\n", dFreq);
++	}
++}
++
++int readMultiplyLO(usb_dev_handle *handle, int index, double * mul, double *sub) {
++	
++//	double sub, mul;
++	int nBytes;
++	unsigned int iSM[2];
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_MULTIPLY_LO, 0, index, (char *) iSM, sizeof(iSM), 500);
++
++	if (nBytes == sizeof(iSM)) {
++		*sub = (double)(int) iSM[0] / (1UL << 21); // Signed value
++		*mul = (double)      iSM[1] / (1UL << 21);
++			return 0;
++	} else {
++			return -1;
++	}
++}
++
++
++void readSmoothTunePPM(usb_dev_handle *handle) {
++	unsigned short smooth;
++	int nBytes;
++	
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_SMOOTH_TUNE_PPM, 0, 0, (char *) &smooth, sizeof(smooth), 500);
++
++	if (nBytes == 2) {
++		printf("Smooth Tune : %d PPM\n", smooth);
++	}
++}
++
++int readFilters(usb_dev_handle *handle, int isLPF, unsigned short * FilterCrossOver, int length) {
++//	unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++	int nBytes;
++	int index = isLPF == 0 ? 255 : 255 + 256;
++	
++	// first find out how may cross over points there are for the 1st bank, use 255 for index
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, 0, index, (char *) FilterCrossOver, length, 500);
++  
++	return nBytes / 2;  
++}
++
++int readBPFAddresses(usb_dev_handle *handle, unsigned char * addresses) {
++	int nBytes;
++	
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_BPF_ADDRESS, 0, 0, (char *) addresses, 16, 500);
++	
++	return nBytes;
++}
++
++void setBPFAddress(usb_dev_handle *handle, int index, int value) {
++	unsigned char * addresses[16]; 
++	
++	usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_SET_BPF_ADDRESS, value, index, (char *) addresses, sizeof(addresses), 500);
++
++}
++
++void setBPFCrossOver(usb_dev_handle *handle, int index, float newFreq) {
++  unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++  int nFilters;
++
++	
++  // first find out how may cross over points there are for the 1st bank, use 255 for index
++  //nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, 0, 256+255, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++  nFilters = readFilters(handle, FALSE, FilterCrossOver, sizeof(FilterCrossOver));
++
++  if (nFilters > 0) {
++    FilterCrossOver[index] = newFreq * (1<<5);
++    int i;
++    // even if we just set one point, we have to set all
++    for (i = 0; i < nFilters - 1; i++) 
++	    usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, FilterCrossOver[i], i, NULL, 0, 500);
++    // read out the values when setting the flag.
++    usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, FilterCrossOver[i], i, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++    displayBPFTable(handle, FilterCrossOver, nFilters);
++  }
++
++}
++
++int readLPFAddresses(usb_dev_handle *handle, unsigned char * addresses) {
++	int nBytes;
++	
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_LPF_ADDRESS, 0, 0, (char *) addresses, 16, 500);
++	
++	return nBytes;
++}
++
++void setLPFAddress(usb_dev_handle *handle, int index, int value) {
++	unsigned char * addresses[16]; 
++	
++	usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_SET_LPF_ADDRESS, value, index, (char *) addresses, sizeof(addresses), 500);
++
++}
++
++void setLPFCrossOver(usb_dev_handle *handle, int index, float newFreq) {
++	unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++	int nFilters;
++
++	// first find out how may cross over points there are for the 2nd bank, use 256+255 for index
++	//nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, 0, 256+255, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++  nFilters = readFilters(handle, TRUE, FilterCrossOver, sizeof(FilterCrossOver));
++
++	if (nFilters > 0) {
++		FilterCrossOver[index] = newFreq * (1<<5);
++		int i;
++		// even if we just set one point, we have to set all
++		for (i = 0; i < nFilters - 1; i++) 
++			usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, FilterCrossOver[i], 256+i, NULL, 0, 500);
++		// read out the values when setting the flag.
++		usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, FilterCrossOver[i], 256+i, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++		displayLPFtable(handle, FilterCrossOver, nFilters);
++	}
++}
++
++void setBPF(usb_dev_handle *handle, int enable) {
++	unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++	int nBytes;
++
++	// first find out how may cross over points there are for the 1st bank, use 255 for index
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, 0, 255, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++  
++	if (nBytes > 2) {
++
++		nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, enable, (nBytes / 2) - 1, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++
++		printf("Filter Bank 1:\n");
++		int i;
++		for (i = 0; i < (nBytes / 2) - 1; i++) {
++			printf("  CrossOver[%d] = %f\n", i, (double) FilterCrossOver[i] / (1UL << 5));
++		}
++		printf("  BPF Enabled: %d\n", FilterCrossOver[(nBytes / 2) - 1]); 
++
++	}	
++}
++
++void setLPF(usb_dev_handle *handle, int enable) {
++	unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++	int nBytes;
++
++	// first find out how may cross over points there are for the 2nd bank, use 256+255 for index
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, 0, 256+255, (char *) FilterCrossOver, sizeof(FilterCrossOver), 500);
++  
++	if (nBytes > 2) {
++
++		nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_FILTERS, enable, 256 + (nBytes / 2) - 1, NULL, 0, 500);
++
++	}	
++}
++
++void setXtallFrequency(usb_dev_handle *handle, double xtallFreq) {
++	unsigned int iXtallFreq;
++	int nBytes;
++
++	iXtallFreq = (unsigned int)( xtallFreq * (1UL<<24) );
++	if (verbose)
++		printf("Crystal Freq = %f (%d)\n", xtallFreq, iXtallFreq);
++
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, REQUEST_SET_XTALL_FREQ, 0, 0, (char *) &iXtallFreq, sizeof(iXtallFreq), 500);
++  
++	if (verbose >= 2)
++		printf("Return = %d\n", nBytes);
++
++	if (nBytes < 0)
++		fprintf(stderr, "Failed writing Xtall Frequency to device\n");
++}
++
++void setStartupFrequency(usb_dev_handle *handle, double startupFreq) {
++	unsigned int iStartupFreq;
++	int nBytes;
++
++	iStartupFreq = (unsigned int)( startupFreq * multiplier * (1UL<<21) );
++
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, REQUEST_SET_STARTUP_FREQ, 0, 0, (char *) &iStartupFreq, sizeof(iStartupFreq), 500);
++  
++	if (nBytes < 0)
++		fprintf(stderr, "Failed writing startup Frequency to device\n");
++}
++
++void setSi570Address(usb_dev_handle *handle, unsigned char newI2cAddress) {
++  unsigned char i2cAddress;
++  int nBytes;
++
++  nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_SET_SI570_ADDR, 0, newI2cAddress, (char *) &i2cAddress, sizeof(i2cAddress), 500);
++  
++  if (nBytes < 0)
++    fprintf(stderr, "Failed writing si570 i2c addresss to device\n");
++
++}
++
++short readSi570Address(usb_dev_handle *handle) {
++  unsigned char i2cAddress;
++  int nBytes;
++  
++  nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_SET_SI570_ADDR, 0, 0, (char *) &i2cAddress, sizeof(i2cAddress), 500);
++  
++  if (nBytes = 1) {
++    printf("Si570 I2C   : %x Hex\n", i2cAddress);
++    return i2cAddress;
++  } else {
++    fprintf(stderr, "Failed writing si570 i2c addresss to device\n");
++    return -1;
++  }
++}
++
++void setMultiplyLo(usb_dev_handle * handle, int index, double mul, double sub) 
++{
++	int nBytes;
++    unsigned int iSM[2];
++
++	iSM[0] = (unsigned int)( sub * (1UL << 21) );
++	iSM[1] = (unsigned int)( mul * (1UL << 21) );
++
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, REQUEST_SET_MULTIPLY_LO, 0, index, (char *) &iSM, sizeof(iSM), 500);
++  
++	if (nBytes != sizeof(iSM))
++		fprintf(stderr, "Failed writing multiply/lo values to device\n");
++
++}
++
++void displayBands(usb_dev_handle *handle) {
++  unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++  int nFilters;
++  
++  nFilters = readFilters(handle, FALSE, FilterCrossOver, sizeof(FilterCrossOver));
++  
++  if (nFilters > 0) {
++    unsigned char addresses[16];
++    int nBytes;
++    if ((nBytes = readBPFAddresses(handle, addresses)) < nFilters) {
++      // failed to read anything - populate with default
++      for (int i = 0; i < nFilters; i++) {
++				addresses[i] = i;
++      }
++    }
++    printf("  BPF Enabled: %d\n", FilterCrossOver[nFilters - 1]);
++    if (FilterCrossOver[nFilters - 1] == 0)
++      return;
++    printf("    Band    BPF      Si570\n");
++    printf("----------  ---  -----------------\n");
++    int i;
++    double mul, sub;
++    double bandStart = 0.0;
++    double bandStop;
++    for (i = 0; i < nFilters - 1; i++) {
++      readMultiplyLO(handle, i, &mul, &sub);
++      bandStop =  (double) FilterCrossOver[i] / (1UL << 5);
++      printf("%4.1f..%4.1f  %2d   (F - %3.2f) * %3.5f\n", bandStart, bandStop, addresses[i], sub, mul);
++      bandStart = bandStop;
++    }
++    readMultiplyLO(handle, i, &mul, &sub);
++    printf("%4.1f..      %2d   (F - %3.2f) * %3.5f\n", bandStart, addresses[i], sub, mul);
++  }
++}
++
++void displayBPFTable(usb_dev_handle *handle, unsigned short *FilterCrossOver, int nFilters) { 
++//  if (nFilters > 0) {
++    unsigned char addresses[16];
++    int nBytes;
++    if ((nBytes = readBPFAddresses(handle, addresses)) < nFilters) {
++      // failed to read anything - populate with default
++      for (int i = 0; i < nFilters; i++) {
++				addresses[i] = i;
++      }
++    }
++    printf("  BPF Enabled: %d\n", FilterCrossOver[nFilters - 1]);
++    if (FilterCrossOver[nFilters - 1] == 0)
++      return;
++    printf("    Band    BPF\n");
++    printf("----------  ---\n");
++    int i;
++    double bandStart = 0.0;
++    double bandStop;
++    for (i = 0; i < nFilters - 1; i++) {
++      bandStop =  (double) FilterCrossOver[i] / (1UL << 5);
++      printf("%4.1f..%4.1f  %2d\n", bandStart, bandStop, addresses[i]);
++      bandStart = bandStop;
++    }
++    printf("%4.1f..      %2d\n", bandStart, addresses[i]);
++//  }
++}
++
++void displayLPFs(usb_dev_handle *handle) {
++	unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++	int nFilters;
++  
++  nFilters = readFilters(handle, TRUE, FilterCrossOver, sizeof(FilterCrossOver));
++	if (nFilters > 0) {
++		displayLPFtable(handle, FilterCrossOver, nFilters);
++	}
++}
++
++void displayLPFtable(usb_dev_handle *handle, unsigned short *FilterCrossOver, int nFilters) {
++  //unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++  //int nFilters;
++  
++  //nFilters = readFilters(handle, TRUE, FilterCrossOver, length);
++  
++  //if (nFilters > 0) {
++    unsigned char addresses[16];
++    int nBytes;
++    if ((nBytes = readLPFAddresses(handle, addresses)) < nFilters) {
++      // failed to read anything - populate with default
++      for (int i = 0; i < nFilters; i++) {
++				addresses[i] = i;
++      }
++    }
++
++    printf("  LPF Enabled: %d\n", FilterCrossOver[nFilters - 1]); 
++    if (FilterCrossOver[nFilters - 1] == 0)
++      return;
++    printf("    Band    LPF\n");
++    printf("----------  ---\n");
++    int i;
++    double mul, sub;
++    double bandStart = 0.0;
++    double bandStop;
++    for (i = 0; i < nFilters - 1; i++) {
++      bandStop =  (double) FilterCrossOver[i] / (1UL << 5);
++      printf("%4.1f..%4.1f  %2d\n", bandStart, bandStop, addresses[i]);
++      bandStart = bandStop;
++    }
++    printf("%4.1f..      %2d\n", bandStart, addresses[i]);
++    
++  //}
++}
++
++/*void displayBPFCrossovers(usb_dev_handle *handle) {
++  unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++  int nFilters;
++  
++  nFilters = readFilters(handle, FALSE, FilterCrossOver, sizeof(FilterCrossOver));
++  
++  if (nFilters > 0) {
++    printf("BPF Filter Bank:\n");
++    int i;
++    for (i = 0; i < nFilters - 1; i++) {
++	    printf("  CrossOver[%d] = %f\n", i, (double) FilterCrossOver[i] / (1UL << 5));
++    }
++    printf("  BPF Enabled: %d\n", FilterCrossOver[nFilters - 1]); 
++
++  }	
++}
++
++void displayLPFCrossovers(usb_dev_handle *handle) {
++  
++  unsigned short FilterCrossOver[16];        // allocate enough space for up to 16 filters
++  int nFilters;
++  
++  nFilters = readFilters(handle, TRUE, FilterCrossOver, sizeof(FilterCrossOver));
++  
++  if (nFilters > 0) {
++    printf("LPF Filter Bank:\n");
++    int i;
++    for (i = 0; i < nFilters - 1; i++) {
++	    printf("  CrossOver[%d] = %f\n", i, (double) FilterCrossOver[i] / (1UL << 5));
++    }
++    printf("  LPF Enabled: %d\n", FilterCrossOver[nFilters - 1]); 
++
++  }	
++}*/
++
+--- /dev/null
++++ usbsoftrock-1.0.2~svn5/src/operations.c
+@@ -0,0 +1,429 @@
++/***
++ * SoftRock USB I2C host control program
++ * Copyright (C) 2009 Andrew Nilsson (andrew.nilsson@gmail.com)
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ * 
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ *
++ * Based on powerSwitch.c by Christian Starkjohann,
++ * and usbtemp.c by Mathias Dalheimer
++ * of Objective Development Software GmbH (2005)
++ * (see http://www.obdev.at/avrusb)
++ */
++
++/*
++   General Description:
++   This program queries and controls the AVR Si570 hardware.
++   It must be linked with libusb, a library for accessing the USB bus from
++   Linux, FreeBSD, Mac OS X and other Unix operating systems. Libusb can be
++   obtained from http://libusb.sourceforge.net/.
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <getopt.h>
++
++/* Needed to compile on older FC3 systems */
++#if defined __linux
++#include <sys/types.h>
++#include <linux/limits.h>
++#endif
++
++#include <math.h>
++#include <usb.h>    /* this is libusb, see http://libusb.sourceforge.net/ */
++
++#include "operations.h"
++
++extern int verbose;
++
++extern int major;
++extern int minor;
++
++extern int i2cAddress;
++extern double fXtall;
++extern double startupFreq;
++extern double multiplier;
++
++int HS_DIV_MAP[] = {4,5,6,7,-1,9,-1,11};
++
++#define USB_SUCCESS		    0
++#define USB_ERROR_NOTFOUND  1
++#define USB_ERROR_ACCESS    2
++#define USB_ERROR_IO        3
++
++char    serialNumberString[256];
++
++int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid, char *buf, int buflen)
++{
++  char    buffer[256];
++  int     rval, i;
++
++  if((rval = usb_control_msg(dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) + index, langid, buffer, sizeof(buffer), 1000)) < 0)
++    return rval;
++  if(buffer[1] != USB_DT_STRING)
++    return 0;
++  if((unsigned char)buffer[0] < rval)
++    rval = (unsigned char)buffer[0];
++  rval /= 2;
++  /* lossy conversion to ISO Latin1 */
++  for(i=1;i<rval;i++){
++    if(i > buflen)  /* destination buffer overflow */
++      break;
++    buf[i-1] = buffer[2 * i];
++    if(buffer[2 * i + 1] != 0)  /* outside of ISO Latin1 range */
++      buf[i-1] = '?';
++  }
++  buf[i-1] = 0;
++  return i-1;
++}
++
++unsigned char usbOpenDevice(usb_dev_handle **device, int vendor, char *vendorName, int product, char *productName, char *usbSerialID)
++{
++  struct usb_bus      *bus;
++  struct usb_device   *dev;
++  usb_dev_handle      *handle = NULL;
++  unsigned char       errorCode = USB_ERROR_NOTFOUND;
++  static int          didUsbInit = 0;
++
++  if(!didUsbInit){
++    didUsbInit = 1;
++    usb_init();
++  }
++  usb_find_busses();
++  usb_find_devices();
++  for(bus=usb_get_busses(); bus; bus=bus->next){
++    for(dev=bus->devices; dev; dev=dev->next){
++      if(dev->descriptor.idVendor == vendor && dev->descriptor.idProduct == product){
++        char    string[256];
++        int     len;
++        handle = usb_open(dev); /* we need to open the device in order to query strings */
++        if(!handle){
++          errorCode = USB_ERROR_ACCESS;
++          fprintf(stderr, "Warning: cannot open USB device: %s\n", usb_strerror());
++          continue;
++        }
++        if(vendorName == NULL && productName == NULL){  /* name does not matter */
++          break;
++        }
++        /* now check whether the names match: */
++        len = usbGetStringAscii(handle, dev->descriptor.iManufacturer, 0x0409, string, sizeof(string));
++        if(len < 0){
++          errorCode = USB_ERROR_IO;
++          fprintf(stderr, "Warning: cannot query manufacturer for device: %s\n", usb_strerror());
++        }else{
++          errorCode = USB_ERROR_NOTFOUND;
++           //fprintf(stderr, "seen device from vendor ->%s<-\n", string); 
++          if(strcmp(string, vendorName) == 0){
++            len = usbGetStringAscii(handle, dev->descriptor.iProduct, 0x0409, string, sizeof(string));
++            if(len < 0){
++              errorCode = USB_ERROR_IO;
++              fprintf(stderr, "Warning: cannot query product for device: %s\n", usb_strerror());
++            }else{
++              errorCode = USB_ERROR_NOTFOUND;
++               //fprintf(stderr, "seen product ->%s<-\n", string); 
++              if(strcmp(string, productName) == 0) {
++		len = usbGetStringAscii(handle, dev->descriptor.iSerialNumber, 0x0409, serialNumberString, sizeof(serialNumberString));
++		if (len < 0) {
++		  errorCode = USB_ERROR_IO;
++		  fprintf(stderr, "Warning: cannot query serial number for device: %s\n", usb_strerror());
++		}else{
++		  errorCode = USB_ERROR_NOTFOUND;
++		  if ((usbSerialID == NULL) || (strcmp(serialNumberString, usbSerialID) == 0)) {
++		    break;
++		  }
++		}
++	      }
++            }
++          }
++        }
++        usb_close(handle);
++        handle = NULL;
++      }
++    }
++    if(handle)
++      break;
++  }
++  if(handle != NULL){
++    errorCode = USB_SUCCESS;
++    *device = handle;
++  }
++  return errorCode;
++}
++
++void usbClose(usb_dev_handle * handle)
++{
++}
++void printBuffer(char * buffer, int length)
++{
++	int i;
++	for (i=0; i < length; i++) {
++		printf("buffer[%d] = %X\n", i, (unsigned char) buffer[i]);
++	}
++}
++
++double calculateFrequency(unsigned char * buffer) {
++	int RFREQ_int = ((buffer[2] & 0xf0) >> 4) + ((buffer[1] & 0x3f) * 16);
++	int RFREQ_frac = (256 * 256 * 256 * (buffer[2] & 0xf)) + (256 * 256 * buffer[3]) + (256 * buffer[4]) + (buffer[5]);
++	double RFREQ = RFREQ_int + (RFREQ_frac / 268435456.0);
++	int N1 = ((buffer[1] & 0xc0 ) >> 6) + ((buffer[0] & 0x1f) * 4);
++	int HS_DIV = (buffer[0] & 0xE0) >> 5;
++	double fout = fXtall * RFREQ / ((N1 + 1) * HS_DIV_MAP[HS_DIV]);
++	
++	if (verbose >= 2) {
++	   printf("RFREQ = %f\n", RFREQ);
++	   printf("N1 = %d\n", N1);
++	   printf("HS_DIV = %d\n", HS_DIV);
++	   printf("nHS_DIV = %d\n", HS_DIV_MAP[HS_DIV]);
++	   printf("fout = %f\n", fout);
++	}
++
++	return fout;
++}
++
++unsigned short readVersion(usb_dev_handle *handle) {
++	//unsigned char buffer[2];
++	unsigned short version;
++	int nBytes;
++
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_VERSION, 0x0E00, 0, (char *) &version, sizeof(version), 500);
++
++	if (nBytes == 2) {
++		printf("Version     : %d.%d\n", (version & 0xFF00) >> 8, version & 0xFF);
++		return version;
++	} else {
++		printf("Version     : UNKNOWN\n");
++		return 0;
++	}
++}
++
++double readFrequencyByValue(usb_dev_handle *handle) {
++	unsigned int iFreq;
++	int nBytes;
++    
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_FREQUENCY, 0, 0, (char *) &iFreq, sizeof(iFreq), 500);
++
++	if (nBytes == 4) {
++		double dFreq;		
++        	dFreq = (double)iFreq / (1UL<<21);
++		return dFreq;
++	}
++	return 0.0;
++
++}
++
++void getRegisters(usb_dev_handle *handle) {
++	unsigned char buffer[6];
++	int nBytes;
++
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_REGISTERS, SI570_I2C_ADDR, 0, (char *)buffer, sizeof(buffer), 5000);
++
++	if (nBytes > 0) {
++		int i;
++		for (i=0; i < 6; i++) {
++			printf("Register %d = %X (%d)\n", i + 7,  (unsigned char) buffer[i], (unsigned char) buffer[i]);
++		}
++	}
++}
++
++double getFrequency(usb_dev_handle *handle) {
++	unsigned char buffer[6];
++	int nBytes;
++
++	nBytes = usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_REGISTERS, SI570_I2C_ADDR, 0, (char *)buffer, sizeof(buffer), 5000);
++
++	if (nBytes > 0) {
++		int i;
++		if (verbose >= 2) {
++			for (i=0; i < 6; i++) {
++				printf("Register %d = %X (%d)\n", i + 7,  (unsigned char) buffer[i], (unsigned char) buffer[i]);
++			}
++		}
++		return  calculateFrequency(buffer);
++		//printf("Frequency: %f MHz\n", calculateFrequency(buffer) / multiplier);
++	}
++	return 0.0;
++}
++
++int getPTT(usb_dev_handle *handle){
++	char buffer[1];
++
++	buffer[0] = 0;
++
++	usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_KEYS, 0, 0, (char *) buffer, sizeof(buffer), 5000);
++
++	if (buffer[0] & 0x40) return 1;
++	else return 0;
++}
++
++int getkeys(usb_dev_handle *handle){
++	char buffer[1];
++	int keys = 0;
++
++	buffer[0] = 0;
++
++	usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_READ_KEYS, 0, 0, (char *) buffer, sizeof(buffer), 5000);
++
++	if (buffer[0] & 0x20) keys = 0;		// CW_KEY_1   high: not pressed   low: pressed
++	else keys = 1;
++	if (!(buffer[0] & 0x02)) keys +=2;	// CW_KEY_2   high: not pressed   low: pressed
++						// keys = 3  if both pressed
++	return keys;
++}
++
++void setPTT(usb_dev_handle *handle, int value) {
++	char buffer[3];
++
++	buffer[0] = 0;
++	buffer[1] = 0;
++	buffer[2] = 0;
++	
++	usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, REQUEST_SET_PTT, value, 0, (char *)buffer, sizeof(buffer), 5000);
++}
++
++int calcDividers(double f, struct solution* solution)
++{
++	struct solution sols[8]; 
++	int i;
++	double y;
++	int imin;
++	double fmin;
++	
++	// Count down through the dividers
++	for (i=7;i >= 0;i--) {
++		
++		if (HS_DIV_MAP[i] > 0) {
++			sols[i].HS_DIV = i;
++			y = (SI570_DCO_HIGH + SI570_DCO_LOW) / (2 * f);
++			y = y / HS_DIV_MAP[i];
++			if (y < 1.5) {
++				y = 1.0;
++			} else {
++				y = 2 * round ( y / 2.0);
++			}
++			if (y > 128) {
++				y = 128;
++			}
++			sols[i].N1 = trunc(y) - 1;
++			sols[i].f0 = f * y * HS_DIV_MAP[i];
++		} else {
++			sols[i].f0 = 10000000000000000.0;
++		}
++	}
++	imin = -1;
++	fmin = 10000000000000000.0;
++		
++	for (i=0; i < 8; i++) {
++		if ((sols[i].f0 >= SI570_DCO_LOW) && (sols[i].f0 <= SI570_DCO_HIGH)) {
++			if (sols[i].f0 < fmin) {
++				fmin = sols[i].f0;
++				imin = i;
++			}
++		}
++	}
++		
++	if (imin >=0) {
++		solution->HS_DIV = sols[imin].HS_DIV;
++		solution->N1 = sols[imin].N1;
++		solution->f0 = sols[imin].f0;
++		solution->RFREQ = sols[imin].f0 / fXtall;
++
++		if (verbose >= 2) {
++			printf("solution->HS_DIV = %d\n", solution->HS_DIV);
++			printf("solution->N1 = %d\n", solution->N1);
++			printf("solution->f0 = %f\n", solution->f0);
++			printf("solution->RFREQ = %f\n", solution->RFREQ);
++		}	
++
++		return 1;
++	} else {
++		return 0;
++	}
++}
++
++void setLongWord( int value, char * bytes)
++{
++	bytes[0] = value & 0xff;
++	bytes[1] = ((value & 0xff00) >> 8) & 0xff;
++	bytes[2] = ((value & 0xff0000) >> 16) & 0xff;
++	bytes[3] = ((value & 0xff000000) >> 24) & 0xff;
++} 
++
++void setFrequency(usb_dev_handle * handle, double frequency)
++{
++	
++	char buffer[6];
++	int request = REQUEST_SET_FREQ;
++	int value = 0x700 + i2cAddress;
++	int index = 0;
++	double f = frequency * multiplier;
++	if (verbose)
++		printf("Setting Si570 Frequency by registers to: %f\n", f);
++	
++	struct solution theSolution;
++	calcDividers(f, &theSolution); 
++	
++	int RFREQ_int = trunc(theSolution.RFREQ);
++	int RFREQ_frac = round((theSolution.RFREQ - RFREQ_int)*268435456);
++	unsigned char fracBuffer[4];
++	unsigned char intBuffer[4];
++	setLongWord(RFREQ_int, (char *) intBuffer);
++	setLongWord(RFREQ_frac, (char *) fracBuffer);
++	
++	buffer[5] = fracBuffer[0];
++	buffer[4] = fracBuffer[1];
++	buffer[3] = fracBuffer[2];
++	buffer[2] = fracBuffer[3];
++	buffer[2] = buffer[2] | ((intBuffer[0] & 0xf) << 4);
++	buffer[1] = RFREQ_int / 16;
++	buffer[1] = buffer[1] + ((theSolution.N1 & 3) << 6);
++	buffer[0] = theSolution.N1 / 4;
++	buffer[0] = buffer[0] + (theSolution.HS_DIV << 5);
++	
++	if (usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, request, value, index, buffer, sizeof(buffer), 5000)) {
++		if (verbose >= 2) printBuffer(buffer, 2);
++		
++	} else {
++		fprintf(stderr, "Failed writing frequency to device\n");
++	}
++}
++
++void setFreqByValue(usb_dev_handle * handle, double frequency)
++{	
++	char buffer[4];
++	int request = REQUEST_SET_FREQ_BY_VALUE;
++	int value = 0x700 + i2cAddress;
++	int index = 0;
++	
++	double f = multiplier * frequency;
++    
++	setLongWord(round(f * 2097152.0), buffer);
++	if (verbose) {
++		printf("Setting Si570 Frequency by value to: %f\n", f);
++        if (verbose >= 2)
++		  printBuffer(buffer,4);
++	}
++
++	if (usb_control_msg(handle, USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, request, value, index, buffer, sizeof(buffer), 5000)) {
++		if (verbose >= 2) printBuffer(buffer, 2);
++		
++	} else {
++		fprintf(stderr, "Failed setting frequency");
++	}
++}
