@@ -9,5 +9,6 @@ Package: usbsoftrock
 Depends: libusb (>= 1.0)
 Recommends: sdr-shell
 Architecture: any
-Description: Usbsoftrock allows use of the Si570 based Softrock kits (and others) from Linux.
 Homepage: http://code.google.com/p/usbsoftrock/
+Description: Control the Si570 Softrock
+ Allows use of the Si570 based Softrock kits (and others) from Linux.
