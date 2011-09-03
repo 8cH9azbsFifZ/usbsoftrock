@@ -3766,6 +3766,7 @@ fi
 
 
 
+
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -3894,6 +3895,7 @@ if test -n "$libusb_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_libusb_CFLAGS=`$PKG_CONFIG --cflags "libusb" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes 
 else
   pkg_failed=yes
 fi
@@ -3910,6 +3912,7 @@ if test -n "$libusb_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_libusb_LIBS=`$PKG_CONFIG --libs "libusb" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes 
 else
   pkg_failed=yes
 fi
@@ -3929,9 +3932,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libusb" 2>&1`
+	        libusb_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libusb" 2>&1`
         else 
-	        libusb_PKG_ERRORS=`$PKG_CONFIG --print-errors "libusb" 2>&1`
+	        libusb_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libusb" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$libusb_PKG_ERRORS" >&5

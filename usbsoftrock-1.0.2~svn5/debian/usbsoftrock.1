@@ -1,0 +1,209 @@
+.TH usbsoftrock "1" "Version 1.0.2~svn5" "USER COMMANDS"
+.SH NAME
+usbsoftrock \- Control Si507 based SDR
+.SH SYNOPSIS
+.B usbsoftrock
+.RI [ options ] COMMAND
+.SH OPTION
+  -a                             Advanced firmware present
+                                 i.e. let the firmware calculate registers
+  -d                             Enter a mode that listens for commands via UDP.
+  -h                             PTT status by reading hardware port
+                                 Mobo only.
+  -i <address>                   I2C address in DECIMAL (DEFAULT = 85 (0x55))
+  -m <multiplier>                Multiplication factor for frequency (DEFAULT = 4)
+  -p <port num>                  Port to listen for UDP datagrams (DEFAULT = 19004)
+  -s <startup frequency MHz>     Factory programmed startup frequency (DEFAULT = 56.32)
+  -u <serial number>             Serial Number of Device
+  -v                             Verbose output (fairly useful)
+  -vv                            Even more verbose output (debugging)
+  -x <calibrated xtall freq MHz> Corrected XTALL frequency of Si570 device calculated
+                                 through the use of the calibrate command immediately
+                                 after startup.
+COMMAND is one of
+  calibrate (may require -s option)
+  getfreq
+  getregisters
+  interactive
+  getptt                                 (-h option for Mobo only)
+  getkeys                                (PE0FKO+TF3LJ+Mobo)
+  gettone
+  ptt {on|off}
+  set bpf {on|off}                       (PE0FKO+TF3LJ+Mobo)
+  set bpf_addr <band> <filter>           (PE0FKO >= 15.12+Mobo)
+  set bpf_point <crossover> <f in MHz>   (PE0FKO+TF3LJ+Mobo)
+  set lpf {on|off}                       (TF3LJ+Mobo only)
+  set lpf_addr <band> <filter>                   "     
+  set lpf_point <crossover> <f in MHz>           "     
+  set freq <frequency in MHz>
+  set si570_addr <i2c address in decimal>
+  set si570_multiplier [band] <decimal factor>  (PE0FKO>=15.12+Mobo)
+  set startup <frequency in MHz>         (PE0FKO+TF3LJ+Mobo)
+  set xtall <frequency in MHz>           (PE0FKO+TF3LJ+Mobo)
+  status
+
+  where TF3LJ = Lofturs AtMega168 derivative
+        Mobo  = Mobo 4.3 Project AT90USB162 Firmware
+SH ENVIRONMENT VARIABLES
+.TP
+.B SDR_DEFRATE
+Set samplerate
+.\".TP
+.\".B SDR_HOST
+.\"TBD
+.\".TP
+.\".B SDR_MODE
+.\"TBD
+.\".TP
+.\".B SDR_BAND
+.\"TBD
+.\".TP
+.\".B SDR_RXTX
+.\"TBD
+.SH DESCRIPTION
+sdr-shell is a gui for a software defined radio based on dttsp.
+.SH OPTIONS
+.TP
+.B \-v or \-\-verbose
+Verbose output
+.\".TP
+.\".B \-h or \-\-host
+.\"TBD
+.TP
+.B \-f or \-\-sample-rate=<samplerate>
+Set sample rate
+.TP
+.B \-r or \-\-rx-command-port=<portnum>
+Use port <portnum> as a conduit for update commands.
+Default is 19001
+.TP
+.B \-s or \-\-spectrum-port=<portnum>
+Use port <portnum> as conduit for spectrum data.
+Default is 19002
+.TP
+.B \-m or \-\-meter-port=<portnum>
+Use port <portnum> as conduit for meter data.
+Default is 19003
+.TP
+.B \-t or \-\-tx-command-port=<portnum>
+Use port <portnum> as a conduit for update commands.
+Default is 19005
+.TP
+.B \-u or \-\-usbsoftrock-port=<portnum>
+Use port <portnum> as a conduit for update commands.
+Default is 19004
+.TP
+.B \-l or \-\-conf-file=<configuration file>
+The file is in ~/.config/freesoftware/ on Linux.
+
+.SH KEYBOARD COMMANDS
+.TP
+.B Right-Arrow or k
+Increase tunning frequency
+.TP
+.B Left-Arrow or j
+Decrease tunning frequency
+.TP
+.B Up-Arrow or h
+Increase tunning step
+.TP
+.B Down-Arrow or l
+Decrease tunning step
+.TP
+.B u
+Decrease lower limit of filter passband
+.TP
+.B i
+Increase lower limit of filter passband
+.TP
+.B o
+Decrease higher limit of filter passband
+.TP
+.B p
+Increase higher limit of filter passband
+.TP
+.B [
+filter[lh] -= step
+.TP
+.B ]  
+filter[lh] += step
+.TP
+.B q
+Decrease IQ gain
+.TP
+.B w
+Increase IQ gain
+.TP
+.B e
+Decrease IQ phase
+.TP
+.B r
+Increase IQ phase
+.TP
+.B z
+Decrease spectrogram color aperture lower limit
+.TP
+.B x
+Increase spectrogram color aperture lower limit
+.TP
+.B c
+Decrease spectrogram color aperture higher limit
+.TP
+.B v
+Increase spectrogram color aperture higher limit
+.TP 
+.B t
+toggle transmit on/off
+.TP
+.B SPACE
+turn transmit off
+.TP
+.B ESC
+Quit program
+.SH MOUSE COMMANDS
+.TP
+.B Left click on upper spectrogram
+Bring signal to passband
+.TP
+.B Left click + horizontal drag on upper spectrogram
+Tune in 1 Hz steps
+.TP
+.B Right click + horizontal drag on upper spectrogram
+Tune in 10 Hz steps
+.TP
+.B Middle click + horizontal drag on upper spectrogram
+Tune in 100 Hz steps
+.TP
+.B Left click on NR label
+Toggle Noise Reduction
+.TP
+.B Left click on ANF label
+Toggle Automatic Notch Filter
+.TP
+.B Left click on NB label
+Toggle Noise Blanker
+.TP
+.B Left click on BIN label
+Tougle Binaural Audio output
+.TP
+.B Right click on F1-F8 labels
+Read memory
+.TP
+.B Middle click on F1-F8 labels
+Write memory
+.TP
+.B Right click on CFG label
+Open configuration window
+.SH CONFIGURATION
+In order to start sdr-shell you need to
+* have a sdr hardware connected to your machine
+* have dttsp (sdr-core) running
+* connect the audio interfaces using jackd
+For detailed instructions on how to use sdr-shell have a look at the
+README provided with this package.
+You may also want to go to http://code.google.com/p/sdr-shell.
+.SH EXAMPLES
+Example startup scripts for common configurations are provided in 
+/usr/share/doc/sdr-shell/startup/.
+.SH AUTHOR
+Dr. Gerolf Ziegenhain (g (at) ziegenhain.com)
