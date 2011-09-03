@@ -1,0 +1,2 @@
+shlibs:Depends=libusb (>= 1.0)
+misc:Depends=

@@ -6,7 +6,7 @@ Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
 Build-Depends: debhelper (>= 7.0.50), libc6 (>= 2.3.4), libstdc++6 (>= 4.4.0), libusb-dev
 
 Package: usbsoftrock 
-Depends: libusb (>= 1.0)
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Recommends: sdr-shell
 Architecture: any
 Homepage: http://code.google.com/p/usbsoftrock/
