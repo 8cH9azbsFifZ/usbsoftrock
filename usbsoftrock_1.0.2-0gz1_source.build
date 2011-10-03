@@ -15,9 +15,58 @@ dpkg-source: warning: unknown information field 'Essential' in input data in gen
 dh  clean
    dh_testdir
    dh_auto_clean
+make[1]: Entering directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+test -z "usbsoftrock" || rm -f usbsoftrock
+rm -f *.o
+rm -f *.tab.c
+test -z "" || rm -f 
+test . = "." || test -z "" || rm -f 
+rm -f config.h stamp-h1
+rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+rm -f config.status config.cache config.log configure.lineno config.status.lineno
+rm -rf ./.deps
+rm -f Makefile
+make[1]: Leaving directory `/root/usbsoftrock/usbsoftrock-1.0.2'
    dh_clean
  dpkg-source -b usbsoftrock-1.0.2
 dpkg-source: info: using options from usbsoftrock-1.0.2/debian/source/local-options: --single-debian-patch
 dpkg-source: warning: unknown information field 'Essential' in input data in general section of control info file
-dpkg-source: error: can't build with source format '3.0 (quilt)': no orig.tar file found
-dpkg-buildpackage: error: dpkg-source -b usbsoftrock-1.0.2 gave error exit status 255
+dpkg-source: info: using source format `3.0 (quilt)'
+dpkg-source: info: building usbsoftrock using existing ./usbsoftrock_1.0.2.orig.tar.gz
+dpkg-source: info: local changes stored in usbsoftrock-1.0.2/debian/patches/debian-changes, the modified files are:
+ usbsoftrock-1.0.2/autogen.sh
+ usbsoftrock-1.0.2/src/Makefile.am
+ usbsoftrock-1.0.2/src/Makefile.in
+ usbsoftrock-1.0.2/src/config_ops.c
+ usbsoftrock-1.0.2/src/config_ops.h
+ usbsoftrock-1.0.2/src/depcomp
+ usbsoftrock-1.0.2/src/interactive.c
+ usbsoftrock-1.0.2/src/interactive.h
+ usbsoftrock-1.0.2/src/operations.c
+ usbsoftrock-1.0.2/src/operations.h
+ usbsoftrock-1.0.2/src/usbsoftrock.c
+dpkg-source: info: building usbsoftrock in usbsoftrock_1.0.2-0gz1.debian.tar.gz
+dpkg-source: info: building usbsoftrock in usbsoftrock_1.0.2-0gz1.dsc
+ dpkg-genchanges -S >../usbsoftrock_1.0.2-0gz1_source.changes
+dpkg-genchanges: warning: unknown information field 'Essential' in input data in general section of control info file
+dpkg-genchanges: including full source code in upload
+ dpkg-source --after-build usbsoftrock-1.0.2
+dpkg-source: info: using options from usbsoftrock-1.0.2/debian/source/local-options: --single-debian-patch
+dpkg-source: warning: unknown information field 'Essential' in input data in general section of control info file
+dpkg-buildpackage: full upload (original source is included)
+Now running lintian...
+warning: lintian's authors do not recommend running it with root privileges!
+W: usbsoftrock source: newer-standards-version 3.9.2 (current is 3.9.1)
+Finished running lintian.
+Now signing changes and any dsc files...
+ signfile usbsoftrock_1.0.2-0gz1.dsc Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+gpg: gpg-agent is not available in this session
+
+ signfile usbsoftrock_1.0.2-0gz1_source.changes Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+gpg: gpg-agent is not available in this session
+
+Successfully signed dsc and changes files

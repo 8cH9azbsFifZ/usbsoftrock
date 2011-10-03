@@ -16,6 +16,18 @@ dpkg-source: warning: unknown information field 'Essential' in input data in gen
 dh  clean
    dh_testdir
    dh_auto_clean
+make[1]: Entering directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+test -z "usbsoftrock" || rm -f usbsoftrock
+rm -f *.o
+rm -f *.tab.c
+test -z "" || rm -f 
+test . = "." || test -z "" || rm -f 
+rm -f config.h stamp-h1
+rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+rm -f config.status config.cache config.log configure.lineno config.status.lineno
+rm -rf ./.deps
+rm -f Makefile
+make[1]: Leaving directory `/root/usbsoftrock/usbsoftrock-1.0.2'
    dh_clean
  dpkg-source -b usbsoftrock-1.0.2
 dpkg-source: info: using options from usbsoftrock-1.0.2/debian/source/local-options: --single-debian-patch
