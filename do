@@ -4,7 +4,7 @@ cd usbso*
 rm debian/debhelper.log
 
 #./debian/rules get-orig-source
-#mv sdr*gz ..
+#mv *gz ..
 
 #checksum not updated
 debuild
