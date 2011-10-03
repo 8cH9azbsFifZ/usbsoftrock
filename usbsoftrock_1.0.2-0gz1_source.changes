@@ -1,0 +1,49 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Format: 1.8
+Date: Tue, 24 Aug 2011 23:55:52 +0100
+Source: usbsoftrock
+Binary: usbsoftrock
+Architecture: source
+Version: 1.0.2-0gz1
+Distribution: unstable
+Urgency: low
+Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Changed-By: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Description: 
+ usbsoftrock - Control the Si570 Softrock
+Changes: 
+ usbsoftrock (1.0.2-0gz1) unstable; urgency=low
+ .
+   * Initial release.
+Checksums-Sha1: 
+ ebeb094d4eaadaefd7f00254479ef0cffa17bf7a 1720 usbsoftrock_1.0.2-0gz1.dsc
+ e2dd8c67e2352e623d5003c401c150fe633f91e4 108658 usbsoftrock_1.0.2.orig.tar.gz
+ ef297a3980639a168121271b31ee0290eb9b57c8 25415 usbsoftrock_1.0.2-0gz1.debian.tar.gz
+Checksums-Sha256: 
+ 36afdc97aa4601b83dd0efaef223276810eb26d97033312e51fc77fea6291d42 1720 usbsoftrock_1.0.2-0gz1.dsc
+ 3f638b364ef01f3fc155d3abe05eeeb7818c2b2e80faff223a13a510bc801110 108658 usbsoftrock_1.0.2.orig.tar.gz
+ a36e0c35aaa7fcbf21ad5e472cc4a56b7d89ab5637d6a9fdded49f414c0ed58e 25415 usbsoftrock_1.0.2-0gz1.debian.tar.gz
+Files: 
+ abedf1506ff3ce5355c22b180aa4a351 1720 hamradio extra usbsoftrock_1.0.2-0gz1.dsc
+ d2ea9bebf93938f419e2db0e82204b48 108658 hamradio extra usbsoftrock_1.0.2.orig.tar.gz
+ 36090e722537979f5cd5586a9839f54f 25415 hamradio extra usbsoftrock_1.0.2-0gz1.debian.tar.gz
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iQIcBAEBCAAGBQJOiXNMAAoJEFkTlKde1nyToQUP/1S+djf4tKJg2claYwUjGRmL
+yUIfq12SCPuvtErQLZBci7jL0GKE2SY72ZVSDhkUrowjhV3G9lM/CUmFgILxHuSD
+nFW5XYlgchfVRwn/UoDO6dJa6IZd8nkHlyFxqSBofcLMiMhlEWaQ1pG6C4Ub3GRn
+L3b7UwSu4j+qDpDWI1n1I6ZIkTuqGSsVdnb26qHjQyQ9fsb3jebjzoqAicUVJltT
+FCT7O1vFMy5bE//1GCed81YKPP6CJL5xyK6wFGMiAZ89HgZoNDNksE3ZZAmSb+IW
+UmvTsdzVIGrI9hk9fx/KOOcWMEDw4DLDuE8+SqadX9fhZ4NBx9UFT2wJyxee7c5C
+AWvwQQ7AB2e4DlLh+tvq66ORzVvVzn7n2tieqseu8vL44sPEQwGNgB98UT0h/hcc
+pSuVnGdV5/mqZNu02rVoM3P4Pw7rs0WrjKKhV9BaqisYVC/hEMDI1v6yUBeMYNmr
+OdKIWJbnPjnELVMNVzoKrTJLfq7CkJY2fI4+iuWJpFjRB90Ze4bS4CpdGhVyTYrN
+j2fL7mygI3QwBF80zNqDZVhK9G9cp+P7zjStV4uqmcbhDN5jIC/xPGJcekB+dxLA
+2P1LPQ1R3Bvvba4RK0OeysthlWXfAQi1cS0x4Zrlw4WxR2I44fWOl07HHtt+Tf1E
+PYxFifpdV/efWn+YLf1j
+=8eKN
+-----END PGP SIGNATURE-----
