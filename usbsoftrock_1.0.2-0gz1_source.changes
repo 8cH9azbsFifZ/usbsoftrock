@@ -18,32 +18,32 @@ Changes:
  .
    * Initial release.
 Checksums-Sha1: 
- ebeb094d4eaadaefd7f00254479ef0cffa17bf7a 1720 usbsoftrock_1.0.2-0gz1.dsc
+ 09a93bb30977a8328f17a249e06ec85358332d73 1720 usbsoftrock_1.0.2-0gz1.dsc
  e2dd8c67e2352e623d5003c401c150fe633f91e4 108658 usbsoftrock_1.0.2.orig.tar.gz
- ef297a3980639a168121271b31ee0290eb9b57c8 25415 usbsoftrock_1.0.2-0gz1.debian.tar.gz
+ 8265895b02d9753bb2aa0d2b17bd3334cd92a0f6 25452 usbsoftrock_1.0.2-0gz1.debian.tar.gz
 Checksums-Sha256: 
- 36afdc97aa4601b83dd0efaef223276810eb26d97033312e51fc77fea6291d42 1720 usbsoftrock_1.0.2-0gz1.dsc
+ 805edf7b8ee889234a281dde2e0b76de34ba298ff2bda3d8827310cb508cda08 1720 usbsoftrock_1.0.2-0gz1.dsc
  3f638b364ef01f3fc155d3abe05eeeb7818c2b2e80faff223a13a510bc801110 108658 usbsoftrock_1.0.2.orig.tar.gz
- a36e0c35aaa7fcbf21ad5e472cc4a56b7d89ab5637d6a9fdded49f414c0ed58e 25415 usbsoftrock_1.0.2-0gz1.debian.tar.gz
+ 7b728c6cc12d04a6e105ef861528383bf6688c10bced35a67b1d3c65c6f109f4 25452 usbsoftrock_1.0.2-0gz1.debian.tar.gz
 Files: 
- abedf1506ff3ce5355c22b180aa4a351 1720 hamradio extra usbsoftrock_1.0.2-0gz1.dsc
+ a8970bd0aa5ba6a191124aecb71cde3d 1720 hamradio extra usbsoftrock_1.0.2-0gz1.dsc
  d2ea9bebf93938f419e2db0e82204b48 108658 hamradio extra usbsoftrock_1.0.2.orig.tar.gz
- 36090e722537979f5cd5586a9839f54f 25415 hamradio extra usbsoftrock_1.0.2-0gz1.debian.tar.gz
+ 9de764edd4659b3908283636722f3277 25452 hamradio extra usbsoftrock_1.0.2-0gz1.debian.tar.gz
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iQIcBAEBCAAGBQJOiXNMAAoJEFkTlKde1nyToQUP/1S+djf4tKJg2claYwUjGRmL
-yUIfq12SCPuvtErQLZBci7jL0GKE2SY72ZVSDhkUrowjhV3G9lM/CUmFgILxHuSD
-nFW5XYlgchfVRwn/UoDO6dJa6IZd8nkHlyFxqSBofcLMiMhlEWaQ1pG6C4Ub3GRn
-L3b7UwSu4j+qDpDWI1n1I6ZIkTuqGSsVdnb26qHjQyQ9fsb3jebjzoqAicUVJltT
-FCT7O1vFMy5bE//1GCed81YKPP6CJL5xyK6wFGMiAZ89HgZoNDNksE3ZZAmSb+IW
-UmvTsdzVIGrI9hk9fx/KOOcWMEDw4DLDuE8+SqadX9fhZ4NBx9UFT2wJyxee7c5C
-AWvwQQ7AB2e4DlLh+tvq66ORzVvVzn7n2tieqseu8vL44sPEQwGNgB98UT0h/hcc
-pSuVnGdV5/mqZNu02rVoM3P4Pw7rs0WrjKKhV9BaqisYVC/hEMDI1v6yUBeMYNmr
-OdKIWJbnPjnELVMNVzoKrTJLfq7CkJY2fI4+iuWJpFjRB90Ze4bS4CpdGhVyTYrN
-j2fL7mygI3QwBF80zNqDZVhK9G9cp+P7zjStV4uqmcbhDN5jIC/xPGJcekB+dxLA
-2P1LPQ1R3Bvvba4RK0OeysthlWXfAQi1cS0x4Zrlw4WxR2I44fWOl07HHtt+Tf1E
-PYxFifpdV/efWn+YLf1j
-=8eKN
+iQIcBAEBCAAGBQJOiXsyAAoJEFkTlKde1nyTilEP/j1kxbEvZBPF+i1VqTgDjtt8
+dNMQstaVsqQOJGKhpnkAgJ4/Z1KPyzUSfkmro8U01Ri77FIRsWi4aB0i/tD9e/JP
+UQnxq1+J4FzN/tFZWrcxR6O2sXB6mgi0Vc2Dps6/OZ97lwtk4FsRwTIGPP6OuUGs
+LOMkPOfveUdYi1HPjI0KQCvP/3b6LQp4j2wTHBAZmQ/cjmzOtetJrU7L1qqrcajr
+wn2UJAJpSdPbNQkvdpnXpEapfTD0Pwu2Gs1cYlKOI52Xqyh/UNbtK4S0iNje3XFu
+g2VhIrDskPYjScy5a35bGEpCGm53+6x13/Cy8JSoId92JQBMbUY0glKzcm6XjM6I
+sUjJfuXGo8imjdK0Q+MmtcwDvjHmnmAbNPanMVP4D/ZzgoIONnnGTdJ3EichEQp8
+vQF6DC+RuWGvjs3Iub5xu4Lwlbwiaz0xL4sC8JeSYH3E5yCVTciFqg7ATsuINwm1
+cqO6S5qy+qrPHgCTKICk8vJ0d0jgRFtKQeE1BgWrL0gV8Ol9Ofa/k4PrnyoRMZzt
+vD1Re0E5f/KQtu8fZUOjdi3bAO7i8WVEaL/ugmVCnkgumgJhTDFsk102cLciG6Yt
+to4rQFGPVl90o0JErfkvMzYv1e8Eh4AgXWa1xlfDgd0H+3NSi6nORApbNmfuvSYT
+q8iVpKgHyqWJ4d1leNGU
+=I/ha
 -----END PGP SIGNATURE-----

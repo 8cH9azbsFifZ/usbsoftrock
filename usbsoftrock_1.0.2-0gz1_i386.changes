@@ -18,35 +18,35 @@ Changes:
  .
    * Initial release.
 Checksums-Sha1: 
- eaa4a3e87f08defb957860515bb7bba30480360a 1720 usbsoftrock_1.0.2-0gz1.dsc
+ 057e0ccdcaf031205e6fef5a23aed199d20d1adc 1720 usbsoftrock_1.0.2-0gz1.dsc
  e2dd8c67e2352e623d5003c401c150fe633f91e4 108658 usbsoftrock_1.0.2.orig.tar.gz
- d014400b5d1fb692b943caa7d64d4e071d0de6f8 25378 usbsoftrock_1.0.2-0gz1.debian.tar.gz
- ace25170b8c99cb62920e28a65bf56fa78f3b3a3 15522 usbsoftrock_1.0.2-0gz1_i386.deb
+ 76f303a2a95f5d08d1ab615e0195f5215be4a06d 25417 usbsoftrock_1.0.2-0gz1.debian.tar.gz
+ f0cb1560330a7b7cf2ac592e48379d635c8b64a3 15524 usbsoftrock_1.0.2-0gz1_i386.deb
 Checksums-Sha256: 
- 962e2aa75e43ea5809b7c4ecbbc91ad97e881745f27e34012dad900abadee6e5 1720 usbsoftrock_1.0.2-0gz1.dsc
+ ab3cf6aa5bb37177c4d72d36f7e183da21158d3b350cec82dac703a9a8c0f41b 1720 usbsoftrock_1.0.2-0gz1.dsc
  3f638b364ef01f3fc155d3abe05eeeb7818c2b2e80faff223a13a510bc801110 108658 usbsoftrock_1.0.2.orig.tar.gz
- 43505ed1701ee2f9e4f51ad78d85bceec647a35b45ba7cf6ab90c11dbb0fb1e0 25378 usbsoftrock_1.0.2-0gz1.debian.tar.gz
- 2d1039c834ebd38311e310a658571eabc85e9d454ef173b5a7b57185b969c708 15522 usbsoftrock_1.0.2-0gz1_i386.deb
+ 0df96e762bacf3cc42f02ce0eaf3feed3c754b204a80bb505f62a868bd201aa2 25417 usbsoftrock_1.0.2-0gz1.debian.tar.gz
+ 1d38c84030c4e6aad1ea2d1991228802ee7f349448d80d642a3fa7169a502302 15524 usbsoftrock_1.0.2-0gz1_i386.deb
 Files: 
- a71dbfe0fd13a1031cfb4d52550b467f 1720 hamradio extra usbsoftrock_1.0.2-0gz1.dsc
+ 4d3b425ec2811ab97e2f8423d2ababdd 1720 hamradio extra usbsoftrock_1.0.2-0gz1.dsc
  d2ea9bebf93938f419e2db0e82204b48 108658 hamradio extra usbsoftrock_1.0.2.orig.tar.gz
- aec9cb6ee672d7a1bcca1d9c4874ae16 25378 hamradio extra usbsoftrock_1.0.2-0gz1.debian.tar.gz
- 294fcba8bbc1f116a72c5e6b3fdf1e0b 15522 hamradio extra usbsoftrock_1.0.2-0gz1_i386.deb
+ 3ec68586af839091132016eca292c0f9 25417 hamradio extra usbsoftrock_1.0.2-0gz1.debian.tar.gz
+ 46c1fe00503b4adfaa3db0369a5492ed 15524 hamradio extra usbsoftrock_1.0.2-0gz1_i386.deb
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iQIcBAEBCAAGBQJOiXNFAAoJEFkTlKde1nyT7O8P/iVN95q7gSOh8GV72nfU0Lt8
-phOVKAF+7Zcof605ZKzbektedz+FZxPI8t51Ki9VkVSVCqaHUG3AF52BKLCKJ/yU
-ySRDIu4FGmYTr81Jad9oM0anG/gb81HyNKTgU1p5x9bOrois7dEjT45A/JrRn20s
-qeYHOYGVPEmk3g38E0tAooJ4Ynk8AthjNeWWPZk7YNbf/+MB57AZjFryadD5psRl
-eeYur74opYnCgp6pYXR2DwP3BYx5RN3He7NLOV6p+xzaxyDivsIuJssotCdfiOBv
-1SwkwWOovb2Uy5RkLn70Poi6Firj4KEBeV27cdUpmMqSVvH1X9p4PNs/Qerndcwh
-XtQ2VSL7qXepI/J67CYhXE9qTZyhc1HCo6BK0kuYEoRZkhqKp4jPee3Ta4gzrt7l
-StMP9gs+KUy/f5XnK07Ns7k7/0qs0kl/irDy7fSaC2FgNdQvS9DHG7NnYpOB/lCh
-vfCyIoDA7JccRpYgP9l8E28O+bOX4WT1eD1C8v5+kMRy2vJBbkSMY1T0GudQgbUQ
-w+4e/4Hz0IfJNxgW79Ib2lQCddgzMPmnjMWKgNitgsaOV1HKPlbD4QlPqYOqPvNm
-Zp5H26O16L55LwSZqx2dyX1axrKGSRwXXzj7yeQVwCBDchtQXJYt4Qe9Y23j8fxK
-T0EpN1ag6Onuq+J4FCNZ
-=tKdM
+iQIcBAEBCAAGBQJOiXr3AAoJEFkTlKde1nyTtmQQAM1A03GtPtTkOHTDQPzue8Aq
+AIQcWwuaGBEycLei77HxpyW9a4Yb3DTx5Dan5DhWdwCFFpN7ZUxIe6B/XQNba7RU
+svyuG7jPOYXuweK0Ec8Wu9qxKAgMia4wJwD2kjIeAbmH3tI0UdMkDSEsFzreaYNI
+Q/DBmwNJklHBY7OFSRBdjGa7oG4f37gbVzYuYZHG/mMt3jPDboxZNgkB2P6Cz5Fs
+ByD0K5CGWtjgc2i/dZnltfcTXGzEUqbL9JDY3BKV5YDyvCrUHCw25OCQ00ztSeO2
+89hNuE+NUpArgcBGSemfGCoyeeqoAC0G8fv4Lg8SunjJfbgTNoVZay3E3S9s2svN
+iEb4s4I2rLKG6JIoSssCFg0T/xygMQbeJXcMkzpo5gygvgdjp2Nz30sOA3/SnUzb
+fZpYh+3pnpb0hOMMmTLqqRg3UehrxAAXCasw7b6esFA5ysSEPs2Ioj2m7Jp2qyBJ
+cCJK8WfryVbzn46BLF6vlkgNAgPAMfWOTXkI4K0RUPRc5rfnQAFn6BKfJro3yQZl
+ML4HFeHIaFWGqKE3dgR1SjKe5rzj0ML4HnXsX71U8IkfFX+TEzrbOZnuVAyXINQ1
+1yqP7lWyU7hWDiDT5TO/tWmUGtyorh/P4LWY828JgBnC+e16T4UKgH4KxshAyAay
+h472sYxJ9iWq25VXiveU
+=Y64W
 -----END PGP SIGNATURE-----
