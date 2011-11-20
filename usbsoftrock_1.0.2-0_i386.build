@@ -1,0 +1,178 @@
+ dpkg-buildpackage -rfakeroot -D -us -uc
+dpkg-buildpackage: warning: using a gain-root-command while being root
+dpkg-buildpackage: export CFLAGS from dpkg-buildflags (origin: vendor): -g -O2
+dpkg-buildpackage: export CPPFLAGS from dpkg-buildflags (origin: vendor): 
+dpkg-buildpackage: export CXXFLAGS from dpkg-buildflags (origin: vendor): -g -O2
+dpkg-buildpackage: export FFLAGS from dpkg-buildflags (origin: vendor): -g -O2
+dpkg-buildpackage: export LDFLAGS from dpkg-buildflags (origin: vendor): 
+dpkg-buildpackage: source package usbsoftrock
+dpkg-buildpackage: source version 1.0.2-0
+dpkg-buildpackage: source changed by Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+ dpkg-source --before-build usbsoftrock-1.0.2
+dpkg-buildpackage: host architecture i386
+dpkg-source: info: using options from usbsoftrock-1.0.2/debian/source/local-options: --single-debian-patch
+dpkg-source: warning: unknown information field 'Essential' in input data in general section of control info file
+ fakeroot debian/rules clean
+dh  clean
+   dh_testdir
+   dh_auto_clean
+   dh_clean
+ dpkg-source -b usbsoftrock-1.0.2
+dpkg-source: info: using options from usbsoftrock-1.0.2/debian/source/local-options: --single-debian-patch
+dpkg-source: warning: unknown information field 'Essential' in input data in general section of control info file
+dpkg-source: info: using source format `3.0 (quilt)'
+dpkg-source: info: building usbsoftrock using existing ./usbsoftrock_1.0.2.orig.tar.gz
+dpkg-source: info: local changes stored in usbsoftrock-1.0.2/debian/patches/debian-changes, the modified files are:
+ usbsoftrock-1.0.2/autogen.sh
+ usbsoftrock-1.0.2/src/Makefile.am
+ usbsoftrock-1.0.2/src/Makefile.in
+ usbsoftrock-1.0.2/src/config_ops.c
+ usbsoftrock-1.0.2/src/config_ops.h
+ usbsoftrock-1.0.2/src/depcomp
+ usbsoftrock-1.0.2/src/interactive.c
+ usbsoftrock-1.0.2/src/interactive.h
+ usbsoftrock-1.0.2/src/operations.c
+ usbsoftrock-1.0.2/src/operations.h
+ usbsoftrock-1.0.2/src/usbsoftrock.c
+dpkg-source: info: building usbsoftrock in usbsoftrock_1.0.2-0.debian.tar.gz
+dpkg-source: info: building usbsoftrock in usbsoftrock_1.0.2-0.dsc
+ debian/rules build
+dh  build
+   dh_testdir
+   dh_auto_configure
+configure: WARNING: unrecognized options: --disable-maintainer-mode
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+checking for gcc... gcc
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ISO C89... none needed
+checking for style of include used by make... GNU
+checking dependency style of gcc... none
+checking for gcc option to accept ISO C99... -std=gnu99
+checking for main in -lncurses... yes
+checking for pkg-config... /usr/bin/pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking for libusb... yes
+checking how to run the C preprocessor... gcc -std=gnu99 -E
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for stdlib.h... (cached) yes
+checking for string.h... (cached) yes
+checking for unistd.h... (cached) yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating config.h
+config.status: executing depfiles commands
+configure: WARNING: unrecognized options: --disable-maintainer-mode
+   dh_auto_build
+make[1]: Entering directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+make  all-am
+make[2]: Entering directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+gcc -std=gnu99 -DHAVE_CONFIG_H -I.     -g -O2   -c usbsoftrock.c
+gcc -std=gnu99 -DHAVE_CONFIG_H -I.     -g -O2   -c operations.c
+gcc -std=gnu99 -DHAVE_CONFIG_H -I.     -g -O2   -c config_ops.c
+gcc -std=gnu99 -DHAVE_CONFIG_H -I.     -g -O2   -c interactive.c
+gcc -std=gnu99  -g -O2     -o usbsoftrock usbsoftrock.o operations.o config_ops.o interactive.o -lm -lncurses  -lusb  
+make[2]: Leaving directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+make[1]: Leaving directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+   dh_auto_test
+ fakeroot debian/rules binary
+dh  binary
+   dh_testroot
+   dh_prep
+   dh_installdirs
+   dh_auto_install
+make[1]: Entering directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+make[2]: Entering directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+test -z "/usr/bin" || /bin/mkdir -p "/root/usbsoftrock/usbsoftrock-1.0.2/debian/usbsoftrock/usr/bin"
+  /usr/bin/install -c usbsoftrock '/root/usbsoftrock/usbsoftrock-1.0.2/debian/usbsoftrock/usr/bin'
+make[2]: Nothing to be done for `install-data-am'.
+make[2]: Leaving directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+make[1]: Leaving directory `/root/usbsoftrock/usbsoftrock-1.0.2'
+   dh_install
+   dh_installdocs
+   dh_installchangelogs
+   dh_installexamples
+   dh_installman
+   dh_installcatalogs
+   dh_installcron
+   dh_installdebconf
+   dh_installemacsen
+   dh_installifupdown
+   dh_installinfo
+   dh_pysupport
+   dh_installinit
+   dh_installmenu
+   dh_installmime
+   dh_installmodules
+   dh_installlogcheck
+   dh_installlogrotate
+   dh_installpam
+   dh_installppp
+   dh_installudev
+   dh_installwm
+   dh_installxfonts
+   dh_bugfiles
+   dh_lintian
+   dh_gconf
+   dh_icons
+   dh_perl
+   dh_usrlocal
+   dh_link
+   dh_compress
+   dh_fixperms
+   dh_strip
+   dh_makeshlibs
+   dh_shlibdeps
+   dh_installdeb
+   dh_gencontrol
+dpkg-gencontrol: warning: unknown information field 'Essential' in input data in general section of control info file
+   dh_md5sums
+   dh_builddeb
+dpkg-deb: building package `usbsoftrock' in `../usbsoftrock_1.0.2-0_i386.deb'.
+ dpkg-genchanges  >../usbsoftrock_1.0.2-0_i386.changes
+dpkg-genchanges: warning: unknown information field 'Essential' in input data in general section of control info file
+dpkg-genchanges: including full source code in upload
+ dpkg-source --after-build usbsoftrock-1.0.2
+dpkg-source: info: using options from usbsoftrock-1.0.2/debian/source/local-options: --single-debian-patch
+dpkg-source: warning: unknown information field 'Essential' in input data in general section of control info file
+dpkg-buildpackage: full upload (original source is included)
+Now running lintian...
+warning: lintian's authors do not recommend running it with root privileges!
+E: usbsoftrock source: debian-revision-should-not-be-zero 1.0.2-0
+W: usbsoftrock source: newer-standards-version 3.9.2 (current is 3.9.1)
+E: usbsoftrock: debian-revision-should-not-be-zero 1.0.2-0
+Finished running lintian.
+Now signing changes and any dsc files...
+ signfile usbsoftrock_1.0.2-0.dsc Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+can't connect to `/tmp/gpg-JdAmfg/S.gpg-agent': No such file or directory
+gpg: can't connect to `/tmp/gpg-JdAmfg/S.gpg-agent': connect failed
+
+ signfile usbsoftrock_1.0.2-0_i386.changes Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+gpg: WARNING: unsafe ownership on configuration file `/root/.gnupg/gpg.conf'
+can't connect to `/tmp/gpg-JdAmfg/S.gpg-agent': No such file or directory
+gpg: can't connect to `/tmp/gpg-JdAmfg/S.gpg-agent': connect failed
+
+Successfully signed dsc and changes files

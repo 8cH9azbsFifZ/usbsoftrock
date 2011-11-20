@@ -1,0 +1,52 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Format: 1.8
+Date: Tue, 24 Aug 2011 23:55:52 +0100
+Source: usbsoftrock
+Binary: usbsoftrock
+Architecture: source i386
+Version: 1.0.2-0
+Distribution: unstable
+Urgency: low
+Maintainer: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Changed-By: Dr. Gerolf Ziegenhain <g@ziegenhain.com>
+Description: 
+ usbsoftrock - Control the Si570 Softrock
+Changes: 
+ usbsoftrock (1.0.2-0) unstable; urgency=low
+ .
+   * Initial release.
+Checksums-Sha1: 
+ 99034c97b25ee13f1be8f974abe3043e0f927b06 1708 usbsoftrock_1.0.2-0.dsc
+ e2dd8c67e2352e623d5003c401c150fe633f91e4 108658 usbsoftrock_1.0.2.orig.tar.gz
+ 4130477529fae5ba913f0f57ffaa8ec1818a390e 25403 usbsoftrock_1.0.2-0.debian.tar.gz
+ eb3fda28e8219afcfa5426ba7f992e0f3a4777c1 15524 usbsoftrock_1.0.2-0_i386.deb
+Checksums-Sha256: 
+ 3346744a0b50e105cf01fa2ca90bf15ec5ce67f9c0b9766a1e1d36ea9d55ab2a 1708 usbsoftrock_1.0.2-0.dsc
+ 3f638b364ef01f3fc155d3abe05eeeb7818c2b2e80faff223a13a510bc801110 108658 usbsoftrock_1.0.2.orig.tar.gz
+ 6fb45a8b1aa03e3cc1d5510b2a91bf36f21d81c20d06028104d8e7e8df16d643 25403 usbsoftrock_1.0.2-0.debian.tar.gz
+ d5a480bbad8ce18f6c604e1302aa818308125c1b78b01483c9ba2045e8be0c99 15524 usbsoftrock_1.0.2-0_i386.deb
+Files: 
+ b1c1a3845c2d1a871c023ebf20955c88 1708 hamradio extra usbsoftrock_1.0.2-0.dsc
+ d2ea9bebf93938f419e2db0e82204b48 108658 hamradio extra usbsoftrock_1.0.2.orig.tar.gz
+ cdb30bae7f834a0ea52fe42c5eeb3a55 25403 hamradio extra usbsoftrock_1.0.2-0.debian.tar.gz
+ 0fa97fed77817bbbb753d3f44f0f7cbc 15524 hamradio extra usbsoftrock_1.0.2-0_i386.deb
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iQIcBAEBCAAGBQJOyOccAAoJEFkTlKde1nyTlbsP/RjQiNSL9K2PeQ/CICw+8z9r
+bbrDU8p7YIq/8tlKp5Mj0hYThZR7/bZddfJvwxVqvu8xuTthbzFqc40jXxpIAV7s
+qZRwhVTfzKQ9bcUjmzilqxKvoftiaP+aLSg7/T0eWchGsOKL/V6nCy4uslxwFRhu
+O/Q/JRTXHcfXiLzf4KpU3l4ms7miEanDXVoz+IyXzuhoesysckETqfBeoEdiBz6C
+Mi3pw79ZIFZuSIEATHrbqTCPk2ESBTIhbCIeOhg/OqAIT9RIyQGq9B8+V2gH55Ak
+U0PRh/oBTfhWGRUZXuvJaPFYaz8ndQUxBd+uYzPs6f9Jhzc4QCRiNm6uXysv/qIa
+LvEiNEZyyBuhEJOoRtw1Bm77CwmjXKLx+qzezbtEd2dN8jFY8lk4sJToQIKLOTrr
+949o/boGcZCWJbEY5hIwpbGxSdWFdB+OxyYNTGXxkRHvRGELO6Sgf6NwxO3/TJMb
+kHngnhXbXpofbqOcZo8Qh44noYSal+e+wyJEwRjRwWoYzSHEIKNQDGa4PiucE6jR
+YFo7h/SD7xPHKwVAzzAkus5MkFOVJ+HOwfJXab6307sVlwiBblB3JXWWiX7t/1Dh
+aIcR1Cx5pt0Fbku3R5KBUCJIRpWs+8f116LZd4uu42trHS54G1zto98uhd+BcPXK
+ZNF6365TBLtz3uOkX4Dh
+=tRJu
+-----END PGP SIGNATURE-----
