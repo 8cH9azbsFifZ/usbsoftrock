@@ -1,0 +1,91 @@
+.TH usbsoftrock "1" "Version 1.0.2~svn5" "USER COMMANDS"
+.SH NAME
+usbsoftrock \- Control Si570 based SDR
+.SH DESCRIPTION
+usbsoftrock is a software to control Si570 based SDR
+.SH SYNOPSIS
+.B usbsoftrock
+.RI [ options ] COMMAND
+.SH OPTIONS
+.TP
+.B \-a
+Advanced firmware presents
+i.e. let the firmware calculate registers
+.TP
+.B \-d
+Enter a mode that listens for commands via UDP.
+.TP
+.B \-h
+PTT status by reading hardware port
+Mobo only.
+.TP
+.B \-i <address>
+I2C address in DECIMAL (DEFAULT = 85 (0x55))
+.TP
+.B \-m <multiplier>
+Multiplication factor for frequency (DEFAULT = 4)
+.TP
+.B \-p <port num>
+Port to listen for UDP datagrams (DEFAULT = 19004)
+.TP
+.B \-s <startup frequency MHz>
+Factory programmed startup frequency (DEFAULT = 56.32)
+.TP
+.B \-u <serial number>
+Serial Number of Device
+.TP
+.B \-v
+Verbose output (fairly useful)
+.TP
+.B \-vv
+Even more verbose output (debugging)
+.TP
+.B \-x <calibrated xtall freq MHz> 
+Corrected XTALL frequency of Si570 device calculated
+through the use of the calibrate command immediately
+after startup.
+.SH COMMANDS
+.TP
+calibrate (may require -s option)
+.TP
+getfreq
+.TP
+getregisters
+.TP
+interactive
+.TP
+getptt                                 (-h option for Mobo only)
+.TP
+getkeys                                (PE0FKO+TF3LJ+Mobo)
+.TP
+gettone
+.TP
+ptt {on|off}
+.TP
+set bpf {on|off}                       (PE0FKO+TF3LJ+Mobo)
+.TP
+set bpf_addr <band> <filter>           (PE0FKO >= 15.12+Mobo)
+.TP
+set bpf_point <crossover> <f in MHz>   (PE0FKO+TF3LJ+Mobo)
+.TP
+set lpf {on|off}                       (TF3LJ+Mobo only)
+.TP
+set lpf_addr <band> <filter>                   "     
+.TP
+set lpf_point <crossover> <f in MHz>           "     
+.TP
+set freq <frequency in MHz>
+.TP
+set si570_addr <i2c address in decimal>
+.TP
+set si570_multiplier [band] <decimal factor>  (PE0FKO>=15.12+Mobo)
+.TP
+set startup <frequency in MHz>         (PE0FKO+TF3LJ+Mobo)
+.TP
+set xtall <frequency in MHz>           (PE0FKO+TF3LJ+Mobo)
+status
+.TP
+Where TF3LJ = Lofturs AtMega168 derivative, Mobo  = Mobo 4.3 Project AT90USB162 Firmware
+
+.SH AUTHOR
+Dr. Gerolf Ziegenhain (g (at) ziegenhain.com)
